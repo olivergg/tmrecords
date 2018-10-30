@@ -16,3 +16,18 @@
  ::active-panel
  (fn [db _]
    (:active-panel db)))
+
+
+(re-frame/reg-sub
+ ::get-players
+ (fn[db _]
+   (as-> (:players db) x 
+     (map :name x))))
+
+
+(re-frame/reg-sub
+ ::get-records
+ (fn[db _]
+   (:records db)))
+       
+

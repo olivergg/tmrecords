@@ -1,23 +1,39 @@
 (ns tmrecords.views
   (:require
    [re-frame.core :as re-frame]
-   [tmrecords.subs :as subs]))
+   [tmrecords.subs :as subs]
+   [goog.string :as gstring]
+   goog.string.format))
    
 
 
-;; score tablese
+;; score table
+(defn readable-duration
+  ;; format number of seconds to readable format mm:ss.SSS
+  [seconds]
+  (let [centisec (-> seconds (* 100) (Math/ceil) (int))
+        cent-r (rem centisec 100)
+        minutes-int (quot seconds 60)
+        minutes-r (rem seconds 60)]
+    (gstring/format "%02d:%02d.%02d" minutes-int minutes-r cent-r)))
+      
 
 (defn score-tables []
-  ;; TODO : read a subscrition to create the table
-  [:div.scoreContainer
-   [:table#scoreTable.scoreTable
-    [:tbody
-     [:tr
-      [:th "Tracks \\ User"] [:th "Mathieu"] [:th "Aymeric"]]
-     [:tr
-      [:td "shorter 01"] [:td "12:03.99"] [:td "12:03.93"]]
-     [:tr
-      [:td "shorter 02"] [:td "12:12.12"] [:td "13:12.12"]]]]])
+  ;; a simple table that displays the records stored in the database
+  (let [players (re-frame/subscribe [::subs/get-players])
+        records (re-frame/subscribe [::subs/get-records])]
+   [:div.scoreContainer
+    [:table#scoreTable.scoreTable
+     [:tbody
+      [:tr
+       [:th "Tracks"] (for [p @players] [:th p])]
+
+      (for [r @records]
+       [:tr
+        [:td (:track r)] (for [p @players]
+                           [:td (-> (get (:times r) p "-")
+                                    (readable-duration))])])]]]))
+
 
 
 ;; home
