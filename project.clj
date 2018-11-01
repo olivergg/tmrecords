@@ -3,7 +3,7 @@
                  [org.clojure/clojurescript "1.10.238"]
                  [reagent "0.7.0"]
                  [re-frame "0.10.5"]
-                 [com.andrewmcveigh/cljs-time "0.5.2"]
+                 [com.degel/re-frame-firebase "0.7.0"]
                  [secretary "1.2.3"]]
 
   :plugins [[lein-cljsbuild "1.1.7"]]
@@ -26,8 +26,8 @@
                    [re-frisk "0.5.3"]]
 
     :plugins      [[lein-figwheel "0.5.16"]]}
-   :prod { }
-   }
+   :prod {}}
+   
 
   :cljsbuild
   {:builds
@@ -41,8 +41,8 @@
                     :source-map-timestamp true
                     :preloads             [devtools.preload
                                            re-frisk.preload]
-                    :external-config      {:devtools/config {:features-to-install :all}}
-                    }}
+                    :external-config      {:devtools/config {:features-to-install :all}}}}
+                    
 
     {:id           "min"
      :source-paths ["src/cljs"]
@@ -50,8 +50,8 @@
                     :output-to       "resources/public/js/compiled/app.js"
                     :optimizations   :advanced
                     :closure-defines {goog.DEBUG false}
-                    :pretty-print    false}}
+                    :pretty-print    false}}]})
 
 
-    ]}
-  )
+    
+  

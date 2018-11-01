@@ -6,6 +6,7 @@
    [tmrecords.routes :as routes]
    [tmrecords.views :as views]
    [tmrecords.config :as config]
+   [tmrecords.firebase :as firebase]
    ))
 
 
@@ -19,8 +20,10 @@
   (reagent/render [views/main-panel]
                   (.getElementById js/document "app")))
 
+
 (defn ^:export init []
   (routes/app-routes)
   (re-frame/dispatch-sync [::events/initialize-db])
   (dev-setup)
+  (firebase/init)
   (mount-root))

@@ -2,6 +2,15 @@
   (:require
    [re-frame.core :as re-frame]))
 
+;; firebase stuff
+(re-frame/reg-sub
+ :user
+ (fn [db _]
+   (:user db)))
+
+
+
+
 (re-frame/reg-sub
  ::name
  (fn [db]
@@ -17,17 +26,13 @@
  (fn [db _]
    (:active-panel db)))
 
-
 (re-frame/reg-sub
  ::get-players
- (fn[db _]
-   (as-> (:players db) x 
+ (fn [db _]
+   (as-> (:players db) x
      (map :name x))))
-
 
 (re-frame/reg-sub
  ::get-records
- (fn[db _]
+ (fn [db _]
    (:records db)))
-       
-

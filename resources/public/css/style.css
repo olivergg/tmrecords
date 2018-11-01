@@ -105,6 +105,11 @@
 				color: #efefef;
 				text-align: left;
 			}
+
+      .footer > a {
+          margin: 0 5px;
+      }
+
 			@-moz-keyframes blinker {
 				25% { opacity: 1.0; }
 				50% { opacity: 0.0; }

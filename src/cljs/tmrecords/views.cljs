@@ -4,10 +4,9 @@
    [tmrecords.subs :as subs]
    [goog.string :as gstring]
    goog.string.format))
-   
 
 
-;; score table
+;; helper functions
 (defn readable-duration
   ;; format number of seconds to readable format mm:ss.SSS
   [seconds]
@@ -15,41 +14,61 @@
         cent-r (rem centisec 100)
         minutes-int (quot seconds 60)
         minutes-r (rem seconds 60)]
-    (gstring/format "%02d:%02d.%02d" minutes-int minutes-r cent-r)))
-      
+    (if (>= seconds 0)
+      (gstring/format "%02d:%02d.%02d" minutes-int minutes-r cent-r)
+      "-")))
 
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; score tables
 (defn score-tables []
   ;; a simple table that displays the records stored in the database
-  (let [players (re-frame/subscribe [::subs/get-players])
-        records (re-frame/subscribe [::subs/get-records])]
+  (let [players @(re-frame/subscribe [::subs/get-players])
+        records @(re-frame/subscribe [::subs/get-records])]
+                                    
    [:div.scoreContainer
     [:table#scoreTable.scoreTable
      [:tbody
-      [:tr
-       [:th "Tracks"] (for [p @players] [:th p])]
+      (into [:tr [:th "Tracks"]] (for [p players] [:th p]))
 
-      (for [r @records]
-       [:tr
-        [:td (:track r)] (for [p @players]
-                           [:td (-> (get (:times r) p "-")
-                                    (readable-duration))])])]]]))
+      ;; TODO : separate function to render the rows (a row renderer)
+      (for [r records]
+        [:tr {:key (:track r)} [:td (:track r)]
+           (for [p players]
+             [:td {:key (str (:track r) p)}
+              (as-> (:times r) x
+                              (get x p "-")
+                              (readable-duration x))])])]]]))
 
-
+;; footer
+(defn footer[]
+  (let [lastupd (re-frame/subscribe [::subs/last-updated])
+        user (re-frame/subscribe [:user])]
+   [:section.footer
+    [:a (get @user :display-name "Not connected")]
+    [:a {:href "#" :on-click #(re-frame/dispatch [:sign-in])} "Sign in"]
+    [:a {:href "#" :on-click #(re-frame/dispatch [:sign-out])} "Sign out"]
+    [:a {:href "#/about"} "About"]
+    [:a {:style {:float "right" }} (str "Last updated : " @lastupd)]]))
 
 ;; home
 (defn home-panel []
-  (let [lastupd (re-frame/subscribe [::subs/last-updated])]
-    [:div
-     [:section.header
-      [:img
-       {:width "150",
-        :src "tm-main.png",
-        :alt "tm-main.png"}]
-      [:div.bigTitle "Records TrackMania"]]
-     [score-tables]
-     [:section.footer 
-      [:a {:href "#/about"} "About"]
-      [:a {:style {:margin-left "10px"}} (str "Last updated : " @lastupd)]]]))
+  [:div
+   [:section.header
+    [:img
+     {:width "150",
+      :src "tm-main.png",
+      :alt "tm-main.png"}]
+    [:div.bigTitle "Records TrackMania"]]
+   [score-tables]
+   [footer]])
+
+
+    
 
 
 
