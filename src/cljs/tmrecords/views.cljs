@@ -1,6 +1,6 @@
 (ns tmrecords.views
   (:require
-   [re-frame.core :as re-frame]
+   [re-frame.core :as rf]
    [tmrecords.subs :as subs]
    [goog.string :as gstring]
    goog.string.format))
@@ -10,7 +10,7 @@
 (defn readable-duration
   ;; format number of seconds to readable format mm:ss.SSS
   [seconds]
-  (let [centisec (-> seconds (* 100) (Math/ceil) (int))
+  (let [centisec (-> seconds (* 100) (Math/round) (int))
         cent-r (rem centisec 100)
         minutes-int (quot seconds 60)
         minutes-r (rem seconds 60)]
@@ -23,12 +23,38 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; a score row renderer (output a tr element)
+(defn record-row [r]
+  (let [players @(rf/subscribe [::subs/get-players])
+        trackname (:track r)
+        times (:times r)
+        podium (mapv first (take 3 (sort-by val times)))]
+
+    [:tr {:key trackname} [:td trackname]
+       (for [p players
+             :let [position (.indexOf podium p)]]
+         [:td {:key (str trackname p)
+
+               :class-name (case position
+                             0 "best"
+                             1 "secondbest"
+                             2 "thirdbest"
+                             "")}
+
+              (as-> times x
+                    (get x p "-")
+                    (readable-duration x))])]))
+
+
+
+
+
 
 ;; score tables
 (defn score-tables []
   ;; a simple table that displays the records stored in the database
-  (let [players @(re-frame/subscribe [::subs/get-players])
-        records @(re-frame/subscribe [::subs/get-records])]
+  (let [players @(rf/subscribe [::subs/get-players])
+        records @(rf/subscribe [::subs/get-records])]
                                     
    [:div.scoreContainer
     [:table#scoreTable.scoreTable
@@ -36,24 +62,21 @@
       (into [:tr [:th "Tracks"]] (for [p players] [:th p]))
 
       ;; TODO : separate function to render the rows (a row renderer)
-      (for [r records]
-        [:tr {:key (:track r)} [:td (:track r)]
-           (for [p players]
-             [:td {:key (str (:track r) p)}
-              (as-> (:times r) x
-                              (get x p "-")
-                              (readable-duration x))])])]]]))
+      (doall (for [r records]
+                (record-row r)))]]]))
 
 ;; footer
 (defn footer[]
-  (let [lastupd (re-frame/subscribe [::subs/last-updated])
-        user (re-frame/subscribe [:user])]
+  (let [lastupd @(rf/subscribe [::subs/last-updated])
+        user @(rf/subscribe [:user])
+        connected (not (nil? (:display-name user)))]
    [:section.footer
-    [:a (get @user :display-name "Not connected")]
-    [:a {:href "#" :on-click #(re-frame/dispatch [:sign-in])} "Sign in"]
-    [:a {:href "#" :on-click #(re-frame/dispatch [:sign-out])} "Sign out"]
+    [:a (get user :display-name "Not connected")]
+    (if connected
+      [:a {:href "#" :on-click #(rf/dispatch [:sign-out])} "Sign out"]
+      [:a {:href "#" :on-click #(rf/dispatch [:sign-in])} "Sign in"])
     [:a {:href "#/about"} "About"]
-    [:a {:style {:float "right" }} (str "Last updated : " @lastupd)]]))
+    [:a#lastupdatedlnk (str "Last updated : " lastupd)]]))
 
 ;; home
 (defn home-panel []
@@ -94,5 +117,5 @@
   [panels panel-name])
 
 (defn main-panel []
-  (let [active-panel (re-frame/subscribe [::subs/active-panel])]
+  (let [active-panel (rf/subscribe [::subs/active-panel])]
     [show-panel @active-panel]))

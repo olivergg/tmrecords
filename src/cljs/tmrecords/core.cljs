@@ -6,8 +6,8 @@
    [tmrecords.routes :as routes]
    [tmrecords.views :as views]
    [tmrecords.config :as config]
-   [tmrecords.firebase :as firebase]
-   ))
+   [tmrecords.firebase :as firebase]))
+
 
 
 (defn dev-setup []

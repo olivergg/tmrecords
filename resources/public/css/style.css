@@ -8,7 +8,7 @@
 			.header {
 /* 				width: 100%; */
 				  background-color: #088A3F;
-         // background-color:red;
+         /* background-color:red; */
 				margin: -4px;
 				margin-bottom: 20px;
 				position: relative;
@@ -28,14 +28,15 @@
 			.header > img {
 
 			}
-			
+
 			.scoreContainer {
 				position: relative;
 				float: left;
 				margin-right: 40px;
-				
-			} 
-			
+				margin-bottom: 50px;
+
+			}
+
 			table.scoreTable {
 /* 				width: 800px; */
 				border-collapse: collapse;
@@ -53,6 +54,7 @@
 				text-align: right;
 				border-right: 1px solid #424242;
 				border-bottom: 1px solid #424242;
+				color : #929292;
 			}
 			table.scoreTable > tbody > tr:NTH-CHILD(2) > td {
 				border-top: 1px solid #424242;
@@ -83,7 +85,7 @@
 			}
 
 			table.scoreTable td.best, table.scoreTable td.best a {
-				color: #FF6600;
+				color: gold;
 				font-weight: bold;
 
 				animation: blinker 1500ms linear infinite;
@@ -93,6 +95,17 @@
 				-webkit-animation-timing-function: linear;
 				-webkit-animation-iteration-count: infinite;
 			}
+
+            table.scoreTable td.secondbest, table.scoreTable td.secondbest a {
+                color: silver;
+                font-weight: bold;
+            }
+
+            table.scoreTable td.thirdbest, table.scoreTable td.thirdbest a {
+                color: #cd7f32;
+                font-weight: bold;
+            }
+
 
 			.footer {
 				position: fixed;
@@ -106,9 +119,13 @@
 				text-align: left;
 			}
 
-      .footer > a {
-          margin: 0 5px;
-      }
+          .footer > a {
+              margin: 0 5px;
+          }
+
+          a#lastupdatedlnk {
+           float:right;
+          }
 
 			@-moz-keyframes blinker {
 				25% { opacity: 1.0; }
