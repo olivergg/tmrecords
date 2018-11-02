@@ -105,7 +105,9 @@
                 color: #cd7f32;
                 font-weight: bold;
             }
-
+            .gold {color:gold;}  
+            .silver {color: silver;}
+            .bronze {color : #cd7f32;}
 
 			.footer {
 				position: fixed;

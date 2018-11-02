@@ -28,9 +28,10 @@
   (let [players @(rf/subscribe [::subs/get-players])
         trackname (:track r)
         times (:times r)
+        gbx (get r :gbx "#")
         podium (mapv first (take 3 (sort-by val times)))]
 
-    [:tr {:key trackname} [:td trackname]
+    [:tr {:key trackname} [:td [:a {:href gbx} trackname]]
        (for [p players
              :let [position (.indexOf podium p)]]
          [:td {:key (str trackname p)
@@ -60,10 +61,30 @@
     [:table#scoreTable.scoreTable
      [:tbody
       (into [:tr [:th "Tracks"]] (for [p players] [:th p]))
-
-      ;; TODO : separate function to render the rows (a row renderer)
       (doall (for [r records]
                 (record-row r)))]]]))
+
+;; olympic ranking table
+(defn ranking []
+  (let [ranking @(rf/subscribe [::subs/ranking])
+        sortedusers (distinct (map :player ranking))
+        findforuserfn (fn [player pos]
+                        (as-> ranking x
+                         (filter #(and (= (:player %) player) (= (:position %) pos)) x)
+                         (first x)
+                         (get x :freq 0)))]
+    [:table "Olympic Ranking"
+     [:tbody
+      [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"]]
+      (map-indexed (fn [idx p]
+                     [:tr [:td (str (inc idx) "." p)]
+                      [:td (findforuserfn p 0)]
+                      [:td (findforuserfn p 1)]
+                      [:td (findforuserfn p 2)]])
+                   sortedusers)]]))
+
+
+
 
 ;; footer
 (defn footer[]
@@ -87,6 +108,7 @@
       :src "tm-main.png",
       :alt "tm-main.png"}]
     [:div.bigTitle "Records TrackMania"]]
+   [ranking]
    [score-tables]
    [footer]])
 
@@ -99,11 +121,12 @@
 (defn about-panel []
   [:div
    [:h1 "About"]
-   [:div "Powered by re-frame, a React based Clojurescript framework"]
+   [:div "Powered by re-frame (a React based Clojurescript framework) and Google Firebase"]
    [:div "Style and images credits to Aymeric Malchrowicz"]
+   [:div "Source code is available on " [:a {:href "https://github.com/olivergg/tmrecords"} "github"]]
    [:div
     [:a {:href "#/"}
-     "go to Home Page"]]])
+     "Back to Home Page"]]])
 
 
 ;; main
