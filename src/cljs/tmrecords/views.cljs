@@ -68,8 +68,8 @@
 (defn ranking []
   (let [ranking @(rf/subscribe [::subs/ranking])
         sortedusers (distinct (map :player ranking))
-        findforuserfn (fn [player pos]
-                        (as-> ranking x
+        findfreq (fn [player pos]
+                   (as-> ranking x
                          (filter #(and (= (:player %) player) (= (:position %) pos)) x)
                          (first x)
                          (get x :freq 0)))]
@@ -78,9 +78,9 @@
       [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"]]
       (map-indexed (fn [idx p]
                      [:tr [:td (str (inc idx) "." p)]
-                      [:td (findforuserfn p 0)]
-                      [:td (findforuserfn p 1)]
-                      [:td (findforuserfn p 2)]])
+                      [:td (findfreq p 0)]
+                      [:td (findfreq p 1)]
+                      [:td (findfreq p 2)]])
                    sortedusers)]]))
 
 
