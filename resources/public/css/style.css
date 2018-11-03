@@ -1,228 +1,286 @@
-			body {
-				font-family: Tahoma, Arial, Serif;
-				font-size: 14px;
-				margin: 0;
-				padding: 4px;
-			}
+body {
+    margin: 0;
+    padding: 4px;
+    box-sizing: border-box;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.428571429;
+    color: #c8c8c8;
+    background-color: #272b30;
+}
 
-			.header {
-/* 				width: 100%; */
-				  background-color: #088A3F;
-         /* background-color:red; */
-				margin: -4px;
-				margin-bottom: 20px;
-				position: relative;
-			}
+.header {
+    background-color: #088A3F;
+    position: fixed;
+    top: 0px;
+    height: 150px;
+    width: 100%;
+    z-index: 1;
+    box-shadow: 1px 1px 5px black;
+}
 
-			.header > .bigTitle {
-				float: right;
-				position: absolute;
-				top: 50px;
-				font-size: 40px;
-				font-weight: bold;
-				color: #efefef;
-				left: 200px;
-				text-shadow: 2px 2px 6px #424242;
-			}
+.header-wrapper {
+    height: 150px;
+}
 
-			.header > img {
+.header>.bigTitle {
+    float: right;
+    position: absolute;
+    top: 50px;
+    font-size: 40px;
+    font-weight: bold;
+    color: #efefef;
+    left: 200px;
+    text-shadow: 2px 2px 6px #424242;
+}
 
-			}
+.header>img {}
 
-			.scoreContainer {
-				position: relative;
-				float: left;
-				margin-right: 40px;
-				margin-bottom: 50px;
+div#app {
+    position: absolute;
+}
 
-			}
+a {
+    color: #ffffff;
+    text-decoration: none;
+}
 
-			table.scoreTable {
-/* 				width: 800px; */
-				border-collapse: collapse;
-				margin: 10px;
-/* 				margin-top: 160px; */
-			}
+table {
+    border-collapse: collapse;
+ 
+    color: #929292;
+}
+table tr > td {
+        border-right: 1px solid #424242;
+    border-bottom: 1px solid #424242;
+}
 
-			table.scoreTable > tbody > tr > th {
-				text-align: center;
-			}
+table.ranking {
+        background-color: rgb(46, 51, 56);
+}
 
-			table.scoreTable > tbody > tr > td {
-				padding: 6px;
-				min-width: 100px;
-				text-align: right;
-				border-right: 1px solid #424242;
-				border-bottom: 1px solid #424242;
-				color : #929292;
-			}
-			table.scoreTable > tbody > tr:NTH-CHILD(2) > td {
-				border-top: 1px solid #424242;
-			}
+.scoreContainer {
+    margin-right: 40px;
+    margin-bottom: 50px;
+}
 
-			table.scoreTable > tbody > tr:hover > td {
-				background-color: #42EFEF !important;
-				color: #EAEAEA !important;
-				transition: color linear 500ms, background-color linear 500ms ;
-			}
+table.scoreTable {
+    margin: 10px;
+    background-color: rgb(46, 51, 56);
+}
 
-			table.scoreTable > tbody > tr:hover > td:hover {
-				background-color: #42AAAA !important;
-				color: white !important;
-				transition-delay: 0ms;
-			}
+table.scoreTable>tbody>tr>th {
+    text-align: center;
+}
 
-			table.scoreTable > tbody > tr td:NTH-CHILD(1) {
-				background-color: #424242;
-				text-align: left;
-				font-weight: bold;
-				border-left: 1px solid #424242;
-			}
+table.scoreTable>tbody>tr>td {
+    padding: 3px;
+    min-width: 100px;
+    text-align: right;
+   
+}
 
-			table.scoreTable > tbody > tr td:NTH-CHILD(3),
-			table.scoreTable > tbody > tr td:NTH-CHILD(5) {
-				/* 	background-color: #FFEFAA; */
-			}
+table>tbody>tr:NTH-CHILD(2)>td {
+    border-top: 1px solid #424242;
+}
 
-			table.scoreTable td.best, table.scoreTable td.best a {
-				color: gold;
-				font-weight: bold;
+table.scoreTable>tbody>tr:hover>td {
+    background-color: #42EFEF !important;
+    color: #EAEAEA !important;
+    transition: color linear 500ms, background-color linear 500ms;
+}
 
-				animation: blinker 1500ms linear infinite;
+table.scoreTable>tbody>tr:hover>td:hover {
+    background-color: #42AAAA !important;
+    color: white !important;
+    transition-delay: 0ms;
+}
 
-				-webkit-animation-name: blinker;
-				-webkit-animation-duration: 1500ms;
-				-webkit-animation-timing-function: linear;
-				-webkit-animation-iteration-count: infinite;
-			}
+table.scoreTable>tbody>tr td:NTH-CHILD(1) {
+    background-color: #424242;
+    text-align: left;
+    font-weight: bold;
+    border-left: 1px solid #424242;
+}
 
-            table.scoreTable td.secondbest, table.scoreTable td.secondbest a {
-                color: silver;
-                font-weight: bold;
-            }
+table.scoreTable>tbody>tr td:NTH-CHILD(3),
+table.scoreTable>tbody>tr td:NTH-CHILD(5) {
+    /* 	background-color: #FFEFAA; */
+}
 
-            table.scoreTable td.thirdbest, table.scoreTable td.thirdbest a {
-                color: #cd7f32;
-                font-weight: bold;
-            }
-            .gold {color:gold;}  
-            .silver {color: silver;}
-            .bronze {color : #cd7f32;}
+table.scoreTable td.best,
+table.scoreTable td.best a {
+    color: gold;
+    font-weight: bold;
+    animation: blinker 1500ms linear infinite;
+    -webkit-animation-name: blinker;
+    -webkit-animation-duration: 1500ms;
+    -webkit-animation-timing-function: linear;
+    -webkit-animation-iteration-count: infinite;
+}
 
-			.footer {
-				position: fixed;
-				width: 100%;
-				margin: -4px;
-				padding: 10px;
-				background-color: #088A3F;
-				bottom: 0;
-				text-shadow: 2px 2px 6px #424242;
-				color: #efefef;
-				text-align: left;
-			}
+table.scoreTable td.secondbest,
+table.scoreTable td.secondbest a {
+    color: silver;
+    font-weight: bold;
+}
 
-          .footer > a {
-              margin: 0 5px;
-          }
+table.scoreTable td.thirdbest,
+table.scoreTable td.thirdbest a {
+    color: #cd7f32;
+    font-weight: bold;
+}
 
-          a#lastupdatedlnk {
-           float:right;
-          }
+.gold {
+    color: gold;
+}
 
-			@-moz-keyframes blinker {
-				25% { opacity: 1.0; }
-				50% { opacity: 0.0; }
-				75% { opacity: 1.0; }
-			}
+.silver {
+    color: silver;
+}
 
-			@-webkit-keyframes blinker {
-				25% { opacity: 1.0; }
-				50% { opacity: 0.0; }
-				75% { opacity: 1.0; }
-			}
+.bronze {
+    color: #cd7f32;
+}
 
-			@keyframes blinker {
-				25% { opacity: 1.0; }
-				50% { opacity: 0.0; }
-				75% { opacity: 1.0; }
-			}
+.footer {
+    position: fixed;
+    width: 100%;
+    margin: -4px;
+    padding: 10px;
+    background-color: #088A3F;
+    bottom: 0;
+    text-shadow: 2px 2px 6px #424242;
+    color: #efefef;
+    text-align: left;
+}
 
+.footer>a {
+    margin: 0 5px;
+}
 
-			.podium {
-				position: relative;
-				float: left;
- 				margin: 10px;
-				width: 600px;
-				height: 600px;
-				/*border: 1px solid black;*/
-			}
+a#lastupdatedlnk {
+    float: right;
+}
 
-			.rank {
-				position: relative;
-				height: 200px;
-				margin-top: 32px;
-				margin-bottom: 6px;
-			}
-			.podium > .rank:nth-child(2) {
+@-moz-keyframes blinker {
+    25% {
+        opacity: 1.0;
+    }
+    50% {
+        opacity: 0.0;
+    }
+    75% {
+        opacity: 1.0;
+    }
+}
 
-			}
-			.rank > .rank-title {
-				font-weight: bold;
-				font-size: 22px;
-			}
+@-webkit-keyframes blinker {
+    25% {
+        opacity: 1.0;
+    }
+    50% {
+        opacity: 0.0;
+    }
+    75% {
+        opacity: 1.0;
+    }
+}
 
-			.podium .bloc {
-				position: absolute;
-				float: left;
-				bottom: 0;
-				text-align: center;
-				transition: bottom 1s ease-in-out 500ms;
-			}
-			.podium .bloc:hover {
-				bottom: 20px;
-			}
-			.podium .bloc .step {
-				box-shadow: 0 2px 6px -2px #424242;
-				transition: box-shadow 1s ease-in-out 500ms;
-			}
-			.podium .bloc:hover .step {
-				box-shadow: 0 15px 6px -2px #424242;
-			}
+@keyframes blinker {
+    25% {
+        opacity: 1.0;
+    }
+    50% {
+        opacity: 0.0;
+    }
+    75% {
+        opacity: 1.0;
+    }
+}
 
-			.podium > .rank > .second {
-				left: 0;
-			}
-			.podium > .rank > .first {
-				left: 82px;
-			}
-			.podium > .rank > .third {
-				left: 164px;
-			}
+.podium {
+    position: relative;
+    float: left;
+    margin: 10px;
+    width: 600px;
+    height: 600px;
+    /*border: 1px solid black;*/
+}
 
-			.podium > .rank > .second > .step {
-				height: 100px;
-				background-color: grey;
-			}
-			.podium > .rank > .first > .step {
-				height: 150px;
-				background-color: goldenrod;
-			}
-			.podium > .rank > .third > .step {
-				height: 50px;
-				background-color: chocolate;
-			}
+.rank {
+    position: relative;
+    height: 200px;
+    margin-top: 32px;
+    margin-bottom: 6px;
+}
 
-			.podium .step {
-				box-shadow: 1px 1px 6px -1px inset #424242;
-				/*border: 1px solid black;*/
-				width: 80px;
-				margin: 0;
-				padding: 0;
-			}
+.podium>.rank:nth-child(2) {}
 
-			.podium .name {
-				font-weight: bold;
-				margin-bottom: -24px;
-				line-height: 22px;
-				font-size: 13px;
-			}
+.rank>.rank-title {
+    font-weight: bold;
+    font-size: 22px;
+}
+
+.podium .bloc {
+    position: absolute;
+    float: left;
+    bottom: 0;
+    text-align: center;
+    transition: bottom 1s ease-in-out 500ms;
+}
+
+.podium .bloc:hover {
+    bottom: 20px;
+}
+
+.podium .bloc .step {
+    box-shadow: 0 2px 6px -2px #424242;
+    transition: box-shadow 1s ease-in-out 500ms;
+}
+
+.podium .bloc:hover .step {
+    box-shadow: 0 15px 6px -2px #424242;
+}
+
+.podium>.rank>.second {
+    left: 0;
+}
+
+.podium>.rank>.first {
+    left: 82px;
+}
+
+.podium>.rank>.third {
+    left: 164px;
+}
+
+.podium>.rank>.second>.step {
+    height: 100px;
+    background-color: grey;
+}
+
+.podium>.rank>.first>.step {
+    height: 150px;
+    background-color: goldenrod;
+}
+
+.podium>.rank>.third>.step {
+    height: 50px;
+    background-color: chocolate;
+}
+
+.podium .step {
+    box-shadow: 1px 1px 6px -1px inset #424242;
+    /*border: 1px solid black;*/
+    width: 80px;
+    margin: 0;
+    padding: 0;
+}
+
+.podium .name {
+    font-weight: bold;
+    margin-bottom: -24px;
+    line-height: 22px;
+    font-size: 13px;
+}

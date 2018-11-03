@@ -73,7 +73,7 @@
                          (filter #(and (= (:player %) player) (= (:position %) pos)) x)
                          (first x)
                          (get x :freq 0)))]
-    [:table "Olympic Ranking"
+    [:table.ranking "Olympic Ranking"
      [:tbody
       [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"]]
       (map-indexed (fn [idx p]
@@ -102,12 +102,12 @@
 ;; home
 (defn home-panel []
   [:div
-   [:section.header
-    [:img
-     {:width "150",
-      :src "tm-main.png",
-      :alt "tm-main.png"}]
-    [:div.bigTitle "Records TrackMania"]]
+   [:div.header-wrapper [:section.header
+                         [:img
+                          {:width "150",
+                           :src "tm-main.png",
+                           :alt "tm-main.png"}]
+                         [:div.bigTitle "Records TrackMania"]]]
    [ranking]
    [score-tables]
    [footer]])
