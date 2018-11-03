@@ -10,7 +10,7 @@
 (defn readable-duration
   ;; format number of seconds to readable format mm:ss.SSS
   [seconds]
-  (let [centisec (-> seconds (* 100) (Math/round) (int))
+  (let [centisec (-> seconds (* 100))
         cent-r (rem centisec 100)
         minutes-int (quot seconds 60)
         minutes-r (rem seconds 60)]
@@ -33,6 +33,43 @@
                         [:div.bigTitle "Records TrackMania"]]])
 
 
+
+(defn- render-delta-score [deltap]
+  (as-> deltap x
+        (vals x)
+        (let [[{avg :avg  count :count}] x]
+           (gstring/format "+%s(%s)" (readable-duration avg) count))))
+
+
+
+
+;;delta podium
+(defn podiums []
+  (let [p @(rf/subscribe [::subs/deltastobest])
+        [firstp secondp thirdp & rest] p
+        secondplayer (first (keys secondp))
+        firstplayer (first (keys firstp))
+        thirdplayer (first (keys thirdp))]
+
+    [:section#podium.podium
+     [:h1 "Deltas podium"]
+     [:div.rank
+      [:div.second.bloc
+       [:div#tc2.name secondplayer [:br] (render-delta-score secondp)]
+       [:div.step " "]
+       " "]
+      [:div.first.bloc
+       [:div#tc1.name firstplayer [:br] (render-delta-score firstp)]
+       [:div.step " "]
+       " "]
+      [:div.third.bloc
+       [:div#tc3.name thirdplayer [:br] (render-delta-score thirdp)]
+       [:div.step " "]
+       " "]]
+     [:div "You must complete at least 80% of all the tracks to be ranked"]]))
+
+
+
 ;; olympic ranking table
 (defn ranking []
   (let [ranking @(rf/subscribe [::subs/ranking])
@@ -52,7 +89,7 @@
                             (= x player)))]
 
     [:section
-     [:h1 "Olympic Ranking"]
+     [:h1 "Olympic ranking"]
      [:table.ranking
       [:tbody
        [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"]]
@@ -119,10 +156,9 @@
 ;; home
 (defn home-panel []
   [:div
-   ;;[header]
    [ranking]
-   [score-table]])
-   ;;[footer]])
+   [score-table]
+   [podiums]])
 
 ;; about
 (defn about-panel []

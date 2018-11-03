@@ -32,6 +32,35 @@
  (fn [db _]
    (:records db)))
 
+(defn mean [coll]
+  (let [sum (apply + coll)
+        count (count coll)]
+    (if (pos? count)
+      {:avg (/ sum count) :count count}
+      {:avg 0 :count 0})))
+
+(re-frame/reg-sub
+  ::deltastobest
+  :<- [::get-records]
+  (fn [records]
+    (as-> (for [r records]
+            (let [trackname (:track r)
+                  times (:times r)
+                  timesasc (sort-by val times)
+                  besttime (second (first timesasc))]
+
+              {:track trackname
+               :deltatobest (into {} (map (fn [[k v]] {k [(- v besttime)]}) timesasc))})) x
+      (identity x)
+      ;;(take 2 x)
+      (reduce (fn [m1 m2] {:deltatobest (merge-with into (:deltatobest m1) (:deltatobest m2))}) x)
+      (:deltatobest x)
+      (map (fn [[k v]] {k (mean v)} ) x)
+      (filter (comp #(>= % (* 0.8 (count records))) :count first vals)  x)
+      (sort-by (comp :avg first vals) x))))
+
+
+
 (re-frame/reg-sub
   ::ranking
   :<- [::get-players]
