@@ -72,15 +72,24 @@
                    (as-> ranking x
                          (filter #(and (= (:player %) player) (= (:position %) pos)) x)
                          (first x)
-                         (get x :freq 0)))]
+                         (get x :freq 0)))
+        medal (as-> ranking x
+                    (group-by :position x)
+                    (map (fn [t] (-> t val first)) x)
+                    (into [] x))
+        hastopmedal (fn [player pos]
+                      (as-> (get medal pos) x
+                            (:player x)
+                            (= x player)))]
+
     [:table.ranking "Olympic Ranking"
      [:tbody
       [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"]]
       (map-indexed (fn [idx p]
                      [:tr [:td (str (inc idx) "." p)]
-                      [:td (findfreq p 0)]
-                      [:td (findfreq p 1)]
-                      [:td (findfreq p 2)]])
+                      [:td {:class-name (if (hastopmedal p 0) "gold" "")} (findfreq p 0)]
+                      [:td {:class-name (if (hastopmedal p 1) "silver" "")} (findfreq p 1)]
+                      [:td {:class-name (if (hastopmedal p 2) "bronze" "")} (findfreq p 2)]])
                    sortedusers)]]))
 
 
