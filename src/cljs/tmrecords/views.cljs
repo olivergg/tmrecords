@@ -23,8 +23,51 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; green header :-)
+(defn header []
+  [:div.header-wrapper [:section.header
+                        [:img
+                         {:width "150",
+                          :src "tm-main.png",
+                          :alt "tm-main.png"}]
+                        [:div.bigTitle "Records TrackMania"]]])
+
+
+;; olympic ranking table
+(defn ranking []
+  (let [ranking @(rf/subscribe [::subs/ranking])
+        sortedusers (distinct (map :player ranking))
+        findfreq (fn [player pos]
+                   (as-> ranking x
+                         (filter #(and (= (:player %) player) (= (:position %) pos)) x)
+                         (first x)
+                         (get x :freq 0)))
+        medal (as-> ranking x
+                    (group-by :position x)
+                    (map (fn [t] (-> t val first)) x)
+                    (into [] x))
+        hastopmedal (fn [player pos]
+                      (as-> (get medal pos) x
+                            (:player x)
+                            (= x player)))]
+
+    [:section
+     [:h1 "Olympic Ranking"]
+     [:table.ranking
+      [:tbody
+       [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"]]
+       (map-indexed (fn [idx p]
+                      [:tr {:key (str idx p)} [:td (str (inc idx) "." p)]
+                       [:td {:class-name (if (hastopmedal p 0) "gold" "")} (findfreq p 0)]
+                       [:td {:class-name (if (hastopmedal p 1) "silver" "")} (findfreq p 1)]
+                       [:td {:class-name (if (hastopmedal p 2) "bronze" "")} (findfreq p 2)]])
+                    sortedusers)]]]))
+
+
+
+
 ;; a score row renderer (output a tr element)
-(defn record-row [r]
+(defn- record-row [r]
   (let [players @(rf/subscribe [::subs/get-players])
         trackname (:track r)
         times (:times r)
@@ -46,54 +89,19 @@
                     (get x p "-")
                     (readable-duration x))])]))
 
-
-
-
-
-
 ;; score tables
-(defn score-tables []
+(defn score-table []
   ;; a simple table that displays the records stored in the database
   (let [players @(rf/subscribe [::subs/get-players])
         records @(rf/subscribe [::subs/get-records])]
-                                    
-   [:div.scoreContainer
+
+   [:section.scoreContainer
+    [:h2 "Track record board"]
     [:table#scoreTable.scoreTable
      [:tbody
       (into [:tr [:th "Tracks"]] (for [p players] [:th p]))
       (doall (for [r records]
                 (record-row r)))]]]))
-
-;; olympic ranking table
-(defn ranking []
-  (let [ranking @(rf/subscribe [::subs/ranking])
-        sortedusers (distinct (map :player ranking))
-        findfreq (fn [player pos]
-                   (as-> ranking x
-                         (filter #(and (= (:player %) player) (= (:position %) pos)) x)
-                         (first x)
-                         (get x :freq 0)))
-        medal (as-> ranking x
-                    (group-by :position x)
-                    (map (fn [t] (-> t val first)) x)
-                    (into [] x))
-        hastopmedal (fn [player pos]
-                      (as-> (get medal pos) x
-                            (:player x)
-                            (= x player)))]
-
-    [:table.ranking "Olympic Ranking"
-     [:tbody
-      [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"]]
-      (map-indexed (fn [idx p]
-                     [:tr [:td (str (inc idx) "." p)]
-                      [:td {:class-name (if (hastopmedal p 0) "gold" "")} (findfreq p 0)]
-                      [:td {:class-name (if (hastopmedal p 1) "silver" "")} (findfreq p 1)]
-                      [:td {:class-name (if (hastopmedal p 2) "bronze" "")} (findfreq p 2)]])
-                   sortedusers)]]))
-
-
-
 
 ;; footer
 (defn footer[]
@@ -111,43 +119,37 @@
 ;; home
 (defn home-panel []
   [:div
-   [:div.header-wrapper [:section.header
-                         [:img
-                          {:width "150",
-                           :src "tm-main.png",
-                           :alt "tm-main.png"}]
-                         [:div.bigTitle "Records TrackMania"]]]
+   ;;[header]
    [ranking]
-   [score-tables]
-   [footer]])
-
-
-    
-
-
+   [score-table]])
+   ;;[footer]])
 
 ;; about
 (defn about-panel []
   [:div
    [:h1 "About"]
-   [:div "Powered by re-frame (a React based Clojurescript framework) and Google Firebase"]
-   [:div "Style and images credits to Aymeric Malchrowicz"]
-   [:div "Source code is available on " [:a {:href "https://github.com/olivergg/tmrecords"} "github"]]
+   [:p "Powered by re-frame (a React based Clojurescript framework) and Google Firebase"]
+   [:p "Style and images credits to Aymeric Malchrowicz"]
+   [:p "Source code is available on " [:a {:href "https://github.com/olivergg/tmrecords"} "github"]]
    [:div
     [:a {:href "#/"}
      "Back to Home Page"]]])
 
 
-;; main
+
 (defn- panels [panel-name]
-  (case panel-name
-    :home-panel [home-panel]
-    :about-panel [about-panel]
-    [:div]))
+  [:div
+   [header]
+   (case panel-name
+     :home-panel [home-panel]
+     :about-panel [about-panel]
+     [:div])
+   [footer]])
 
 (defn show-panel [panel-name]
   [panels panel-name])
 
+;; main
 (defn main-panel []
   (let [active-panel (rf/subscribe [::subs/active-panel])]
     [show-panel @active-panel]))
