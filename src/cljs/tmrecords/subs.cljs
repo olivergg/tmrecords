@@ -51,7 +51,6 @@
 
               {:track trackname
                :deltatobest (into {} (map (fn [[k v]] {k [(- v besttime)]}) timesasc))})) x
-      (identity x)
       ;;(take 2 x)
       (reduce (fn [m1 m2] {:deltatobest (merge-with into (:deltatobest m1) (:deltatobest m2))}) x)
       (:deltatobest x)
@@ -68,9 +67,7 @@
   (fn [[players records] _]
 
     (as-> (for [r records]
-           (let [trackname (:track r)
-                 times (:times r)
-                 gbx (get r :gbx "#")
+           (let [times (:times r)
                  timesasc (mapv first (sort-by val times))]
 
                 (for [p players

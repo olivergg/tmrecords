@@ -13,7 +13,7 @@
 (re-frame/reg-event-db
  ::initialize-db
  (fn [_ _]
-   db/default-db))
+     db/default-db))
 
 (re-frame/reg-event-db
  ::set-active-panel
@@ -52,24 +52,31 @@
  :firebase-error
  (fn [a b] (prn "error" a b)))
 
-;; update the players in the local db using the given value
+;; update the players in the local db using the given value (coming from a firebase snapshot event)
 ;; example value [{:name "Jane"} {:name "Tarzan"}]
 (re-frame/reg-event-db
   :players-updatedb
-  (fn [db [_ value]]
-    (assoc db :players value)))
+  (fn [db [_ players]]
+    (assoc db :players players)))
 
 
-;; update the records in the local db using the given value
+;; update the records in the local db using the given value (coming from a firebase snapshot event)
 (re-frame/reg-event-db
- :records-updatedb
- (fn [db [_ value]]
-   ;; for all records,
-   ;; change the shape of the :times field
-   ;; from [{:player P1 :time t1} {:player P2 :time t2}] to {P1 t1, P2 t2}
-   (assoc db :records
-          (map #(assoc % :times (reduce-kv (fn [m k v] (assoc m (:player v) (:time v))) {} (:times %)))
-           value))))
+  :records-updatedb
+  (fn [db [_ records]]
+   ;; change all records so that the :times field is transformed :
+   ;; before :times [{:player P1 :time t1} {:player P2 :time t2}]
+   ;; after :times {P1 t1, P2 t2}
+   (let [newrecords (map (fn [r] (update r
+                                         :times
+                                         (fn [oldtimes]
+                                           (reduce (fn [m oldentry]
+                                                     (assoc m (:player oldentry) (:time oldentry)))
+                                                   {}
+                                                   oldtimes))))
+                         records)]
+     (assoc db :records newrecords))))
+
 
 ;; helper function to extract the data field from a firestore collection and convert it to a clojurescript map
 (defn extract-firestore-data [raw]

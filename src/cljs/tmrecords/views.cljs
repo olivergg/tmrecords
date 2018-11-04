@@ -43,33 +43,6 @@
 
 
 
-;;delta podium
-(defn podiums []
-  (let [p @(rf/subscribe [::subs/deltastobest])
-        [firstp secondp thirdp & rest] p
-        secondplayer (first (keys secondp))
-        firstplayer (first (keys firstp))
-        thirdplayer (first (keys thirdp))]
-
-    [:section#podium.podium
-     [:h1 "Deltas podium"]
-     [:div.rank
-      [:div.second.bloc
-       [:div#tc2.name secondplayer [:br] (render-delta-score secondp)]
-       [:div.step " "]
-       " "]
-      [:div.first.bloc
-       [:div#tc1.name firstplayer [:br] (render-delta-score firstp)]
-       [:div.step " "]
-       " "]
-      [:div.third.bloc
-       [:div#tc3.name thirdplayer [:br] (render-delta-score thirdp)]
-       [:div.step " "]
-       " "]]
-     [:div "You must complete at least 80% of all the tracks to be ranked"]]))
-
-
-
 ;; olympic ranking table
 (defn ranking []
   (let [ranking @(rf/subscribe [::subs/ranking])
@@ -79,6 +52,11 @@
                          (filter #(and (= (:player %) player) (= (:position %) pos)) x)
                          (first x)
                          (get x :freq 0)))
+        totalfreq (fn [player]
+                    (as-> ranking x
+                          (filter #(and (= (:player %)  player) (<= (:position %) 2)) x)
+                          (map :freq x)
+                          (reduce + x)))
         medal (as-> ranking x
                     (group-by :position x)
                     (map (fn [t] (-> t val first)) x)
@@ -92,12 +70,13 @@
      [:h1 "Olympic ranking"]
      [:table.ranking
       [:tbody
-       [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"]]
+       [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"] [:th "Total"]]
        (map-indexed (fn [idx p]
                       [:tr {:key (str idx p)} [:td (str (inc idx) "." p)]
                        [:td {:class-name (if (hastopmedal p 0) "gold" "")} (findfreq p 0)]
                        [:td {:class-name (if (hastopmedal p 1) "silver" "")} (findfreq p 1)]
-                       [:td {:class-name (if (hastopmedal p 2) "bronze" "")} (findfreq p 2)]])
+                       [:td {:class-name (if (hastopmedal p 2) "bronze" "")} (findfreq p 2)]
+                       [:td (totalfreq p)]])
                     sortedusers)]]]))
 
 
@@ -140,6 +119,36 @@
       (doall (for [r records]
                 (record-row r)))]]]))
 
+
+;;delta podium
+(defn podiums []
+  (let [p @(rf/subscribe [::subs/deltastobest])
+        [firstp secondp thirdp & rest] p
+        secondplayer (first (keys secondp))
+        firstplayer (first (keys firstp))
+        thirdplayer (first (keys thirdp))]
+
+    [:section#podium.podium
+     [:h1 "Deltas podium"]
+     [:div.rank
+      [:div.second.bloc
+       [:div#tc2.name secondplayer [:br] (render-delta-score secondp)]
+       [:div.step " "]
+       " "]
+      [:div.first.bloc
+       [:div#tc1.name firstplayer [:br] (render-delta-score firstp)]
+       [:div.step " "]
+       " "]
+      [:div.third.bloc
+       [:div#tc3.name thirdplayer [:br] (render-delta-score thirdp)]
+       [:div.step " "]
+       " "]]
+     [:div "You must complete at least 80% of all the tracks to be ranked"]]))
+
+
+
+
+
 ;; footer
 (defn footer[]
   (let [lastupd @(rf/subscribe [::subs/last-updated])
@@ -153,7 +162,7 @@
     [:a {:href "#/about"} "About"]
     [:a#lastupdatedlnk (str "Last updated : " lastupd)]]))
 
-;; home
+;; home, record board
 (defn home-panel []
   [:div
    [ranking]
