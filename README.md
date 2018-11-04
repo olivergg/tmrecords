@@ -7,10 +7,10 @@ Alpha preview is available here : https://tmrecords-fa4b2.firebaseapp.com/
 ## Todo
 
 - Google authentication to login and to implement some role based functionnalities
-- Submit a score from the application (input form at first, use image upload later for proof)
-- Add gbx links to the tracks
+- Submit a score from the application (with an input form at first, then use image upload later for proof or even the replay.gbx with some kind of client side parsing)
+- ~~Add gbx links to the tracks~~ (plumbing is done, still need to populate the database now)
 - Further CSS polishing
-- About page should have the same header and footer as the home page
+- ~~The about page should have the same header and footer as the home page~~
 
 ## Development Mode
 
