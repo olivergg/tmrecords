@@ -10,7 +10,7 @@
 (defn readable-duration
   ;; format number of seconds to readable format mm:ss.SSS
   [seconds]
-  (let [centisec (-> seconds (* 100))
+  (let [centisec (js/parseInt (goog.string/format "%.2f" (* seconds 100)))
         cent-r (rem centisec 100)
         minutes-int (quot seconds 60)
         minutes-r (rem seconds 60)]
