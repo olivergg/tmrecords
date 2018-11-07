@@ -131,6 +131,32 @@ table.scoreTable td.thirdbest a {
     font-weight: bold;
 }
 
+
+/** visual diff  */
+#visualdiff-container {
+  background-color: red;
+  overflow: hidden;
+  width: 200px;
+  margin-bottom:50px;
+
+}
+
+#visualdiff-inner {
+  overflow: hidden;
+  width: 2000px;
+}
+
+.visualdiff-child {
+  float: left;
+  background-color: none;
+
+  height: 50px;
+  border-right:solid 2px darkgreen;
+}
+
+
+
+
 .gold {
     color: gold;
 }

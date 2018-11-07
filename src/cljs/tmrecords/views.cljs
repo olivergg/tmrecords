@@ -105,6 +105,17 @@
                     (get x p "-")
                     (readable-duration x))])]))
 
+(defn visualdiff []
+  [:div#visualdiff-container "Visual diff experiments"
+   [:div#visualdiff-inner
+    [:div.visualdiff-child {:style {:width "10px"}}]
+    [:div.visualdiff-child {:style {:width "20px"}}]
+    [:div.visualdiff-child {:style {:width "40px"}}]
+    [:div.visualdiff-child {:style {:width "80px"}}]]])
+
+
+
+
 ;; score tables
 (defn score-table []
   ;; a simple table that displays the records stored in the database
@@ -117,7 +128,9 @@
      [:tbody
       (into [:tr [:th "Tracks"]] (for [p players] [:th p]))
       (doall (for [r records]
-                (record-row r)))]]]))
+                (record-row r)))]]
+    [:br]
+    [visualdiff]]))
 
 
 ;;delta podium
@@ -147,8 +160,6 @@
 
 
 
-
-
 ;; footer
 (defn footer[]
   (let [lastupd @(rf/subscribe [::subs/last-updated])
@@ -161,6 +172,9 @@
       [:a {:href "#" :on-click #(rf/dispatch [:sign-in])} "Sign in"])
     [:a {:href "#/about"} "About"]
     [:a#lastupdatedlnk (str "Last updated : " lastupd)]]))
+
+
+
 
 ;; home, record board
 (defn home-panel []
