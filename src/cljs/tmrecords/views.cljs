@@ -81,6 +81,20 @@
 
 
 
+(defn visualdiff [mock]
+  (let [;;mock [0 0.10 0.48 0.50]
+        maxv (last mock)
+        verticallinesleft (map (fn [v] (/ (* v 100.0) (float maxv))) mock)]
+
+    (prn maxv)
+    (prn verticallinesleft)
+
+    [:div#visualdiff-container
+     [:div#visualdiff-inner
+      (doall (for [x verticallinesleft]
+               [:div.visualdiff-child {:style {:left (str x "px")}}]))]]))
+
+
 
 ;; a score row renderer (output a tr element)
 (defn- record-row [r]
@@ -90,7 +104,8 @@
         gbx (get r :gbx "#")
         podium (mapv first (take 3 (sort-by val times)))]
 
-    [:tr {:key trackname} [:td [:a {:href gbx} trackname]]
+    [:tr {:key trackname} [:td [:a {:href gbx} trackname]] [:td {:style {:width "100px"}}
+                                                            [visualdiff (map second (sort-by val times))]]
        (for [p players
              :let [position (.indexOf podium p)]]
          [:td {:key (str trackname p)
@@ -105,14 +120,6 @@
                     (get x p "-")
                     (readable-duration x))])]))
 
-(defn visualdiff []
-  [:div#visualdiff-container "Visual diff experiments"
-   [:div#visualdiff-inner
-    [:div.visualdiff-child {:style {:width "10px"}}]
-    [:div.visualdiff-child {:style {:width "20px"}}]
-    [:div.visualdiff-child {:style {:width "40px"}}]
-    [:div.visualdiff-child {:style {:width "80px"}}]]])
-
 
 
 
@@ -126,7 +133,7 @@
     [:h2 "Track record board"]
     [:table#scoreTable.scoreTable
      [:tbody
-      (into [:tr [:th "Tracks"]] (for [p players] [:th p]))
+      (into [:tr [:th "Tracks"]  [:th "Diff"] (for [p players] [:th p])])
       (doall (for [r records]
                 (record-row r)))]]
     [:br]

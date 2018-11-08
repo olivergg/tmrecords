@@ -134,10 +134,10 @@ table.scoreTable td.thirdbest a {
 
 /** visual diff  */
 #visualdiff-container {
-  background-color: red;
+  background-color: green;
   overflow: hidden;
-  width: 200px;
-  margin-bottom:50px;
+  width: 110px;
+  
 
 }
 
@@ -148,10 +148,16 @@ table.scoreTable td.thirdbest a {
 
 .visualdiff-child {
   float: left;
-  background-color: none;
+    position:relative;
+ 
+  background-color: red;
+    padding:1px;
+  height: 10px;
+/*
+  border-right:solid 1px darkgreen;
+    border-left:solid 1px darkgreen;
+*/
 
-  height: 50px;
-  border-right:solid 2px darkgreen;
 }
 
 
