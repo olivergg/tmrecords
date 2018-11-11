@@ -2,7 +2,7 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.10.238"]
                  [reagent "0.7.0"]
-                 [re-frame "0.10.5"]
+                 [re-frame "0.10.6"]
                  [com.degel/re-frame-firebase "0.7.0"]
                  [secretary "1.2.3"]]
 

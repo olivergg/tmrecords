@@ -2,15 +2,20 @@
   (:require
    [re-frame.core :as rf]
    [tmrecords.subs :as subs]
+   [iron.re-utils :refer [<sub >evt]]
    [goog.string :as gstring]
    goog.string.format))
 
+;; constants
+;; some predefined colors
+(defonce colors ["gold", "silver", "#cd7f32","#FF34FF", "#008941", "#006FA6", "#A30059"])
 
 ;; helper functions
 (defn readable-duration
-  ;; format number of seconds to readable format mm:ss.SSS
+  "Format a number of seconds to a readable format (mm:ss.SSS) "
   [seconds]
-  (let [centisec (js/parseInt (goog.string/format "%.2f" (* seconds 100)))
+  (let [;; format then reparse to prevent precision issue (for example 9.54 * 100)
+        centisec (js/parseInt (goog.string/format "%.2f" (* seconds 100)))
         cent-r (rem centisec 100)
         minutes-int (quot seconds 60)
         minutes-r (rem seconds 60)]
@@ -18,8 +23,10 @@
       (gstring/format "%02d:%02d.%02d" minutes-int minutes-r cent-r)
       "-")))
 
-
-
+(defn render-podium-label
+  "Render a delta score on the podium (average delta + count)"
+  [{:keys [avg count]}]
+  (gstring/format "+%s(%s)" (readable-duration avg) count))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -30,181 +37,135 @@
                          {:width "150",
                           :src "tm-main.png",
                           :alt "tm-main.png"}]
-                        [:div.bigTitle "Records TrackMania"]]])
+                        [:div.bigTitle "TrackMania Records"]]])
 
 
-
-(defn- render-delta-score [deltap]
-  (as-> deltap x
-        (vals x)
-        (let [[{avg :avg  count :count}] x]
-           (gstring/format "+%s(%s)" (readable-duration avg) count))))
-
-
+(defn footnotelink []
+  [:span [:a {:href "#footnote"} " *"]])
 
 
 ;; olympic ranking table
-(defn ranking []
-  (let [ranking @(rf/subscribe [::subs/ranking])
-        sortedusers (distinct (map :player ranking))
-        findfreq (fn [player pos]
-                   (as-> ranking x
-                         (filter #(and (= (:player %) player) (= (:position %) pos)) x)
-                         (first x)
-                         (get x :freq 0)))
-        totalfreq (fn [player]
-                    (as-> ranking x
-                          (filter #(and (= (:player %)  player) (<= (:position %) 2)) x)
-                          (map :freq x)
-                          (reduce + x)))
-        medal (as-> ranking x
-                    (group-by :position x)
-                    (map (fn [t] (-> t val first)) x)
-                    (into [] x))
-        hastopmedal (fn [player pos]
-                      (as-> (get medal pos) x
-                            (:player x)
-                            (= x player)))]
-
-    [:section
-     [:h1 "Olympic ranking"]
-     [:table.ranking
-      [:tbody
-       [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"] [:th "Total"]]
-       (map-indexed (fn [idx p]
-                      [:tr {:key (str idx p)} [:td (str (inc idx) "." p)]
-                       [:td {:class-name (if (hastopmedal p 0) "gold" "")} (findfreq p 0)]
-                       [:td {:class-name (if (hastopmedal p 1) "silver" "")} (findfreq p 1)]
-                       [:td {:class-name (if (hastopmedal p 2) "bronze" "")} (findfreq p 2)]
-                       [:td (totalfreq p)]])
-                    sortedusers)]]]))
+(defn ranking
+  "Render the Olympic Ranking table"
+  []
+  [:section
+   [:h1 "Olympic ranking" (footnotelink)]
+   [:table.ranking
+    [:tbody
+     [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"] [:th "Total"]]
+     (doall (map-indexed (fn [idx p]
+                           [:tr {:key (str idx p)} [:td (str (inc idx) "." p)]
+                            [:td {:class-name (if (<sub [::subs/is-player-first-for-medal p 0]) "gold" "")}
+                             (<sub [::subs/get-player-rank-freq p 0])]
+                            [:td {:class-name (if (<sub [::subs/is-player-first-for-medal p 1]) "silver" "")}
+                             (<sub [::subs/get-player-rank-freq p 1])]
+                            [:td {:class-name (if (<sub [::subs/is-player-first-for-medal p 2]) "bronze" "")}
+                             (<sub [::subs/get-player-rank-freq p 2])]
+                            [:td (<sub [::subs/get-player-total-medal p])]])
+                         (<sub [::subs/sorteduser])))]]])
 
 
-
-(defonce colors ["#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941", "#006FA6", "#A30059"])
-
-(defn visualdiff [mock]
-  (let [;;mock [0 0.10 0.48 0.50]
-        mock (map #(- % (first mock)) mock)
-        maxv (last mock)
-        verticallinesleft (map (fn [v] (/ (* v 90.0) (float maxv))) mock)]
+(defn visualspread
+  "Render a visual div spread of the given series of numbers"
+  [series]
+  (let [deltatofirst-series (map #(- % (first series)) series)
+        maxdiff (last deltatofirst-series)
+        relativeleft (map (fn [v] (/ (* v 90.0) (float maxdiff))) deltatofirst-series)]
     [:div#visualdiff-container
      [:div#visualdiff-inner
-      (doall (map-indexed (fn [idx x] [:div.visualdiff-child {:key idx
-                                                              :style {:background-color (colors (mod idx 7))
-                                                                      :left (str x "px")}}])
-                          verticallinesleft))]]))
+      (map-indexed (fn [idx x] [:div.visualdiff-child {:key   idx
+                                                       :style {:background-color (colors (mod idx 7))
+                                                               :left             (str x "px")}}])
+                   relativeleft)]]))
+
+(defn score-row
+  "Render a row in the score table (output a tr element)"
+  [{:keys [times ranking track gbx timessorted]}]
+  [:tr [:td [:a {:href (or gbx "#")} track]]
+   (for [p (<sub [::subs/get-players])
+         :let [position (get ranking p -1)
+               duration (readable-duration (get times p "-"))]]
+     ^{:key p}
+     [:td {:class-name (case position
+                         0 "best"
+                         1 "secondbest"
+                         2 "thirdbest"
+                         "")}
+      duration])
+   [:td {:style {:width "100px"}}
+    (visualspread (map second timessorted))]])
 
 
+(defn score-table
+  "A simple table that displays the records stored in the database for each tracks"
+  []
+  [:section.scoreContainer
+   [:h2 "Track record board"]
+   [:table#scoreTable.scoreTable
+    [:tbody
+     [:tr [:th "Track"] (for [p (<sub [::subs/get-players])] ^{:key p} [:th p]) [:th "Spread"]]
+     (for [r (<sub [::subs/ranked-records])]
+       ^{:key (:track r)} [score-row r])]]])
 
 
-;; a score row renderer (output a tr element)
-(defn- record-row [r]
-  (let [players @(rf/subscribe [::subs/get-players])
-        trackname (:track r)
-        times (:times r)
-        gbx (get r :gbx "#")
-        podium (mapv first (take 3 (sort-by val times)))]
-
-    [:tr {:key trackname} [:td [:a {:href gbx} trackname]]
-       (for [p players
-             :let [position (.indexOf podium p)]]
-         [:td {:key (str trackname p)
-
-               :class-name (case position
-                             0 "best"
-                             1 "secondbest"
-                             2 "thirdbest"
-                             "")}
-
-              (as-> times x
-                    (get x p "-")
-                    (readable-duration x))])
-     [:td {:style {:width "100px"}}
-      [visualdiff (map second (sort-by val times))]]]))
-
-
-
-
-;; score tables
-(defn score-table []
-  ;; a simple table that displays the records stored in the database
-  (let [players @(rf/subscribe [::subs/get-players])
-        records @(rf/subscribe [::subs/get-records])]
-
-   [:section.scoreContainer
-    [:h2 "Track record board"]
-    [:table#scoreTable.scoreTable
-     [:tbody
-      [:tr [:th "Tracks"] (for [p players] [:th p]) [:th "Spread"]]
-      (doall (for [r records]
-                [record-row r]))]]
-    [:br]
-    [visualdiff]]))
-
-
-;;delta podium
-(defn podiums []
-  (let [p @(rf/subscribe [::subs/deltastobest])
-        [firstp secondp thirdp & rest] p
-        secondplayer (first (keys secondp))
-        firstplayer (first (keys firstp))
-        thirdplayer (first (keys thirdp))]
-
+(defn deltas-podiums
+  "Render the delta podium (top 3 average time gap with the best time)"
+  []
+  (let [p (<sub [::subs/deltas-podium])
+        [firstp secondp thirdp & _] p
+        {secondplayer :player} secondp
+        {firstplayer :player} firstp
+        {thirdplayer :player} thirdp]
     [:section#podium.podium
-     [:h1 "Deltas podium"]
+     [:h1 "Deltas podium" (footnotelink)]
      [:div.rank
       [:div.second.bloc
-       [:div#tc2.name secondplayer [:br] (render-delta-score secondp)]
+       [:div#tc2.name secondplayer [:br] (render-podium-label secondp)]
        [:div.step " "]
        " "]
       [:div.first.bloc
-       [:div#tc1.name firstplayer [:br] (render-delta-score firstp)]
+       [:div#tc1.name firstplayer [:br] (render-podium-label firstp)]
        [:div.step " "]
        " "]
       [:div.third.bloc
-       [:div#tc3.name thirdplayer [:br] (render-delta-score thirdp)]
+       [:div#tc3.name thirdplayer [:br] (render-podium-label thirdp)]
        [:div.step " "]
-       " "]]
-     [:div "You must complete at least 80% of all the tracks to be ranked"]]))
-
-
+       " "]]]))
 
 ;; footer
 (defn footer[]
-  (let [lastupd @(rf/subscribe [::subs/last-updated])
-        user @(rf/subscribe [:user])
+  (let [lastupd (<sub [::subs/last-updated])
+        user (<sub [:user])
         connected (not (nil? (:display-name user)))]
    [:section.footer
     [:a (get user :display-name "Not connected")]
     (if connected
-      [:a {:href "#" :on-click #(rf/dispatch [:sign-out])} "Sign out"]
-      [:a {:href "#" :on-click #(rf/dispatch [:sign-in])} "Sign in"])
+      [:a {:href "#" :on-click #(>evt [:sign-out])} "Sign out"]
+      [:a {:href "#" :on-click #(>evt [:sign-in])} "Sign in"])
     [:a {:href "#/about"} "About"]
     [:a#lastupdatedlnk (str "Last updated : " lastupd)]]))
 
 
-
-
-;; home, record board
+;; home
 (defn home-panel []
   [:div
    [ranking]
    [score-table]
-   [podiums]])
+   [deltas-podiums]
+   [:div#footnote (gstring/format "* You must complete at least %d% of all the tracks to be ranked"
+                                  (* 100 (<sub [::subs/get-mincount])))]])
 
 ;; about
 (defn about-panel []
   [:div
    [:h1 "About"]
-   [:p "Powered by re-frame (a React based Clojurescript framework) and Google Firebase"]
+   [:p "Powered by re-frame (a React based Clojurescript framework) and Google Firebase for the storage"]
    [:p "Style and images credits to Aymeric Malchrowicz"]
    [:p "Source code is available on " [:a {:href "https://github.com/olivergg/tmrecords"} "github"]]
+   [:p "Largely inspired by " [:a {:href "https://github.com/jakemcc/backgammon"} "the Backgammon game of Jake McCrary"]]
    [:div
     [:a {:href "#/"}
      "Back to Home Page"]]])
-
-
 
 (defn- panels [panel-name]
   [:div
