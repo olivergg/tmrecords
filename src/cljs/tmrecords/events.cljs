@@ -65,15 +65,19 @@
   :records-updatedb
   (fn [db [_ records]]
    ;; change all records so that the :times field is transformed :
-   ;; before :times [{:player P1 :time t1} {:player P2 :time t2}]
-   ;; after :times {P1 t1, P2 t2}
+   ;; before :times [{:player P1 :time t1 :tstamp 0},  {:player P2 :time t2}, ... ]
+   ;; after :times {P1 {:time t1 :tstamp 0}, P2 {:time t2} , ...}
    (let [newrecords (map (fn [r] (update r
                                          :times
                                          (fn [oldtimes]
                                            (reduce (fn [m oldentry]
-                                                     (assoc m (:player oldentry) (:time oldentry)))
+                                                     (assoc m (:player oldentry)
+                                                              (if-let [old (:tstamp oldentry)]
+                                                                {:time (:time oldentry) :tstamp old}
+                                                                {:time (:time oldentry)})))
                                                    {}
                                                    oldtimes))))
+
                          records)]
      (assoc db :records newrecords))))
 

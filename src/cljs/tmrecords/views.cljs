@@ -30,8 +30,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; green header :-)
-(defn header []
+(defn header
+  "The green header :-) "
+  []
   [:div.header-wrapper [:section.header
                         [:img
                          {:width "150",
@@ -40,29 +41,34 @@
                         [:div.bigTitle "TrackMania Records"]]])
 
 
-(defn footnotelink []
+(defn footnotelink
+  "A span to link to the bottom of the page"
+  []
   [:span [:a {:href "#footnote"} " *"]])
 
 
-;; olympic ranking table
 (defn ranking
   "Render the Olympic Ranking table"
   []
-  [:section
-   [:h1 "Olympic ranking" (footnotelink)]
-   [:table.ranking
-    [:tbody
-     [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"] [:th "Total"]]
-     (doall (map-indexed (fn [idx p]
-                           [:tr {:key (str idx p)} [:td (str (inc idx) "." p)]
-                            [:td {:class-name (if (<sub [::subs/is-player-first-for-medal p 0]) "gold" "")}
-                             (<sub [::subs/get-player-rank-freq p 0])]
-                            [:td {:class-name (if (<sub [::subs/is-player-first-for-medal p 1]) "silver" "")}
-                             (<sub [::subs/get-player-rank-freq p 1])]
-                            [:td {:class-name (if (<sub [::subs/is-player-first-for-medal p 2]) "bronze" "")}
-                             (<sub [::subs/get-player-rank-freq p 2])]
-                            [:td (<sub [::subs/get-player-total-medal p])]])
-                         (<sub [::subs/sorteduser])))]]])
+  (let [isplayerfirstformedal (<sub [::subs/is-player-first-for-medal-fn])
+        getplayertotalmedal (<sub [::subs/get-player-total-medal-fn])
+        getplayerrankfreq (<sub [::subs/get-player-rank-freq-fn])
+        sortedusers (<sub [::subs/sorteduser])]
+    [:section
+     [:h1 "Olympic ranking" (footnotelink)]
+     [:table.ranking
+      [:tbody
+       [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"] [:th "Total"]]
+       (doall (map-indexed (fn [idx p]
+                             [:tr {:key (str idx p)} [:td (str (inc idx) "." p)]
+                              [:td {:class-name (if (isplayerfirstformedal p 0) "gold" "")}
+                               (getplayerrankfreq p 0)]
+                              [:td {:class-name (if (isplayerfirstformedal p 1) "silver" "")}
+                               (getplayerrankfreq p 1)]
+                              [:td {:class-name (if (isplayerfirstformedal p 2) "bronze" "")}
+                               (getplayerrankfreq p 2)]
+                              [:td (getplayertotalmedal p)]])
+                           sortedusers))]]]))
 
 
 (defn visualspread
@@ -70,13 +76,13 @@
   [series]
   (let [deltatofirst-series (map #(- % (first series)) series)
         maxdiff (last deltatofirst-series)
-        relativeleft (map (fn [v] (/ (* v 90.0) (float maxdiff))) deltatofirst-series)]
+        leftseries (map (fn [v] (/ (* v 90.0) (float maxdiff))) deltatofirst-series)]
     [:div#visualdiff-container
      [:div#visualdiff-inner
       (map-indexed (fn [idx x] [:div.visualdiff-child {:key   idx
                                                        :style {:background-color (colors (mod idx 7))
                                                                :left             (str x "px")}}])
-                   relativeleft)]]))
+                   leftseries)]]))
 
 (defn score-row
   "Render a row in the score table (output a tr element)"
@@ -132,8 +138,9 @@
        [:div.step " "]
        " "]]]))
 
-;; footer
-(defn footer[]
+(defn footer
+  "The footer"
+  []
   (let [lastupd (<sub [::subs/last-updated])
         user (<sub [:user])
         connected (not (nil? (:display-name user)))]
@@ -146,8 +153,9 @@
     [:a#lastupdatedlnk (str "Last updated : " lastupd)]]))
 
 
-;; home
-(defn home-panel []
+(defn home-panel
+  "Render the home page"
+  []
   [:div
    [ranking]
    [score-table]
@@ -155,8 +163,9 @@
    [:div#footnote (gstring/format "* You must complete at least %d% of all the tracks to be ranked"
                                   (* 100 (<sub [::subs/get-mincount])))]])
 
-;; about
-(defn about-panel []
+(defn about-panel
+  "Render the about page"
+  []
   [:div
    [:h1 "About"]
    [:p "Powered by re-frame (a React based Clojurescript framework) and Google Firebase for the storage"]
@@ -167,7 +176,9 @@
     [:a {:href "#/"}
      "Back to Home Page"]]])
 
-(defn- panels [panel-name]
+(defn- panels
+  "Render the active panel"
+  [panel-name]
   [:div
    [header]
    (case panel-name
@@ -180,6 +191,8 @@
   [panels panel-name])
 
 ;; main
-(defn main-panel []
+(defn main-panel
+  "Main entry point"
+  []
   (let [active-panel (rf/subscribe [::subs/active-panel])]
     [show-panel @active-panel]))

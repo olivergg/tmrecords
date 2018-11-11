@@ -12,11 +12,10 @@
       {:avg 0 :count 0})))
 
 (defn times-sorter
-  "A sorter for times TODO : add timestamp based tie breaker when sorting"
+  "A sorter for times, use tstamp as tie breaker"
   [times]
-  (sort-by val times))
-
-
+  (as-> (sort-by (comp (juxt :time :tstamp) val) times) x
+        (map (fn [t] [(key t) ((comp :time val) t)]) x)))
 
 ;;; default subscriptions
 (re-frame/reg-sub
@@ -28,11 +27,6 @@
  ::active-panel
  (fn [db _]
    (:active-panel db)))
-
-
-
-
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -56,7 +50,7 @@
 
 (re-frame/reg-sub
  ::get-records
- (fn [db _]
+ (fn [db x]
    (:records db)))
 
 (re-frame/reg-sub
@@ -67,6 +61,7 @@
           :let [timesorted (times-sorter (:times r))
                 players-ranks (into {} (map-indexed (fn [idx v] {(first v) idx}) timesorted))]]
          (assoc r :timessorted timesorted
+                  :times (into {} timesorted)
                   :ranking players-ranks
                   :best (second (first timesorted))))))
 
@@ -77,11 +72,11 @@
   (fn [[records mincount] _]
     (as-> (for [r records]
             {:track          (:track r)
-             :diff-with-best (into {} (map (fn [[player time]] {player [(- time (:best r))]})
+             :diff-with-best (into {} (map (fn [[p time]] {p [(- time (:best r))]})
                                            (:timessorted r)))}) x
       (reduce (fn [m1 m2] {:diff-with-best (merge-with into (:diff-with-best m1) (:diff-with-best m2))}) x)
       (:diff-with-best x)
-      (map (fn [[k v]] (merge {:player k} (mean v))) x)
+      (map (fn [[p player-times]] (merge {:player p} (mean player-times))) x)
       (filter (comp #(>= % (* mincount (count records))) :count)  x)
       (sort-by :avg x)
       (take 3 x))))
@@ -137,35 +132,43 @@
     (distinct (map :player ranking))))
 
 (re-frame/reg-sub
-  ::get-player-rank-freq
+  ::get-player-rank-freq-fn
   :<- [::ranking]
-  (fn [ranking [_ player rank]]
-    (as-> ranking x
-      (filter #(and (= (:player %) player) (= (:position %) rank)) x)
-      (first x)
-      (get x :freq 0))))
-
-(re-frame/reg-sub
-  ::get-player-total-medal
-  :<- [::ranking]
-  (fn [ranking [_ player]]
-    (as-> ranking x
-      ;; medal are position 0 (gold) 1 (silver) and 2 (bronze)
-      (filter #(and (= (:player %)  player) (<= (:position %) 2)) x)
-      (map :freq x)
-      (reduce + x))))
-
-(re-frame/reg-sub
-  ::is-player-first-for-medal
-  :<- [::ranking]
-  (fn [ranking [_ player rank]]
+  (fn [ranking]
+    (fn [player rank]
       (as-> ranking x
-             (group-by :position x)
-             (map (fn [t] (-> t val first)) x)
-             (into [] x)
-             (get x rank)
-             (:player x)
-             (= x player))))
+        (filter #(and (= (:player %) player) (= (:position %) rank)) x)
+        (first x)
+        (get x :freq 0)))))
+
+
+(re-frame/reg-sub
+  ::get-player-total-medal-fn
+  :<- [::ranking]
+  (fn [ranking]
+    (fn [player]
+      (as-> ranking x
+            ;; medal are position 0 (gold) 1 (silver) and 2 (bronze)
+            (filter #(and (= (:player %)  player) (<= (:position %) 2)) x)
+            (map :freq x)
+            (reduce + x)))))
+
+
+
+(re-frame/reg-sub
+  ::is-player-first-for-medal-fn
+  :<- [::ranking]
+  (fn [ranking]
+    (fn [player rank]
+      (as-> ranking x
+          (group-by :position x)
+          (map (fn [t] (-> t val first)) x)
+          (into [] x)
+          (get x rank)
+          (:player x)
+          (= x player)))))
+
+
 
 (re-frame/reg-sub
   :user
