@@ -136,7 +136,8 @@ table.scoreTable td.thirdbest a {
 #visualdiff-container {
   background-color: green;
   overflow: hidden;
-  width: 110px;
+  width: 100px;
+    
   
 
 }
@@ -150,9 +151,10 @@ table.scoreTable td.thirdbest a {
   float: left;
     position:relative;
  
-  background-color: red;
-    padding:1px;
-  height: 10px;
+ /* background-color: red;*/
+/*    padding-left:1px;*/
+    width: 2px;
+  height: 20px;
 /*
   border-right:solid 1px darkgreen;
     border-left:solid 1px darkgreen;
@@ -317,4 +319,3 @@ a#lastupdatedlnk {
     font-size: 12px;
     color:white;
     
-}

@@ -81,18 +81,20 @@
 
 
 
+(defonce colors ["#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941", "#006FA6", "#A30059"])
+
 (defn visualdiff [mock]
   (let [;;mock [0 0.10 0.48 0.50]
+        mock (map #(- % (first mock)) mock)
         maxv (last mock)
-        verticallinesleft (map (fn [v] (/ (* v 100.0) (float maxv))) mock)]
-
-    (prn maxv)
-    (prn verticallinesleft)
-
+        verticallinesleft (map (fn [v] (/ (* v 90.0) (float maxv))) mock)]
     [:div#visualdiff-container
      [:div#visualdiff-inner
-      (doall (for [x verticallinesleft]
-               [:div.visualdiff-child {:style {:left (str x "px")}}]))]]))
+      (doall (map-indexed (fn [idx x] [:div.visualdiff-child {:key idx
+                                                              :style {:background-color (colors (mod idx 7))
+                                                                      :left (str x "px")}}])
+                          verticallinesleft))]]))
+
 
 
 
@@ -104,8 +106,7 @@
         gbx (get r :gbx "#")
         podium (mapv first (take 3 (sort-by val times)))]
 
-    [:tr {:key trackname} [:td [:a {:href gbx} trackname]] [:td {:style {:width "100px"}}
-                                                            [visualdiff (map second (sort-by val times))]]
+    [:tr {:key trackname} [:td [:a {:href gbx} trackname]]
        (for [p players
              :let [position (.indexOf podium p)]]
          [:td {:key (str trackname p)
@@ -118,7 +119,9 @@
 
               (as-> times x
                     (get x p "-")
-                    (readable-duration x))])]))
+                    (readable-duration x))])
+     [:td {:style {:width "100px"}}
+      [visualdiff (map second (sort-by val times))]]]))
 
 
 
@@ -133,9 +136,9 @@
     [:h2 "Track record board"]
     [:table#scoreTable.scoreTable
      [:tbody
-      (into [:tr [:th "Tracks"]  [:th "Diff"] (for [p players] [:th p])])
+      [:tr [:th "Tracks"] (for [p players] [:th p]) [:th "Spread"]]
       (doall (for [r records]
-                (record-row r)))]]
+                [record-row r]))]]
     [:br]
     [visualdiff]]))
 
