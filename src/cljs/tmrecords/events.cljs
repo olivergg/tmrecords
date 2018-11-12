@@ -22,11 +22,6 @@
 
 
 
-
-
-
-
-
 ;;;;;;;;;;; FIREBASE STUFF ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Simple sign-in event. Just trampoline down to the re-frame-firebase
 ;;; fx handler.
@@ -50,7 +45,7 @@
 ;; custom handler on firebase error to print the error message in the console
 (re-frame/reg-event-fx
  :firebase-error
- (fn [a b] (prn "error" a b)))
+ (fn [a b] (js/alert (str "error" a b))))
 
 ;; update the players in the local db using the given value (coming from a firebase snapshot event)
 ;; example value [{:name "Jane"} {:name "Tarzan"}]
@@ -82,11 +77,12 @@
      (assoc db :records newrecords))))
 
 
-;; helper function to extract the data field from a firestore collection and convert it to a clojurescript map
+;; helper function to extract the data and id field from a firestore collection and convert it to a clojurescript map
 (defn extract-firestore-data [raw]
   (as-> raw x
     (:docs x)
-    (map :data x)
+    (map (juxt :id :data) x)
+    (map (fn[[k v]] (assoc v :id k)) x)
     (map clojure.walk/keywordize-keys x)))
 
 (re-frame/reg-event-fx
@@ -102,5 +98,32 @@
                                     :on-next #(do (.log js/console "records collection has changed")
                                                   (re-frame/dispatch [:records-updatedb  (extract-firestore-data %)]))}}))
 
+
+
+(re-frame/reg-event-fx
+  :update-record-time
+  (fn [{db :db} [_ trackid player time]]
+    ;; TODO : improve by using unionArray of firestore ? (to update a single element in an array instead of the whole array)
+    {:firestore/update
+     ;;FIXME : change :mock to :records once everything will be properly tested
+     {:path [:mock trackid]
+      :data {:times (as-> db x
+                          (get-in x [:records])
+                          (filter #(= trackid (:id %)) x)
+                          (first x)
+                          (:times x)
+                          (assoc-in x [player :time] time)
+                          (map (fn[[k v]]
+                                 (if (:tstamp v)
+                                  {:player k :time (:time v) :tstamp (:tstamp v)}
+                                  {:player k :time (:time v)})) x))}
+      :on-success #(prn "Success:" %)
+      :on-failure #(js/alert (str "Error:" %))}}))
+
+(re-frame/reg-event-fx
+  ;; TODO : add a button to add a track ?
+  :add-track
+  (fn [_ [_ trackid trackname]] {:firestore/set {:path [:records (keyword trackid)]
+                                                 :data {:track trackname}}}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

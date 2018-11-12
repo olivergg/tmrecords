@@ -1,6 +1,7 @@
 (ns tmrecords.views
   (:require
    [re-frame.core :as rf]
+   [tmrecords.upload]
    [tmrecords.subs :as subs]
    [iron.re-utils :refer [<sub >evt]]
    [goog.string :as gstring]
@@ -106,7 +107,7 @@
   "A simple table that displays the records stored in the database for each tracks"
   []
   [:section.scoreContainer
-   [:h2 "Track record board"]
+   [:h1 "Track record board"]
    [:table#scoreTable.scoreTable
     [:tbody
      [:tr [:th "Track"] (for [p (<sub [::subs/get-players])] ^{:key p} [:th p]) [:th "Spread"]]
@@ -159,6 +160,8 @@
   [:div
    [ranking]
    [score-table]
+   (when (<sub [:user])
+    [tmrecords.upload/upload-component])
    [deltas-podiums]
    [:div#footnote (gstring/format "* You must complete at least %d% of all the tracks to be ranked"
                                   (* 100 (<sub [::subs/get-mincount])))]])

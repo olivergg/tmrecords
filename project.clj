@@ -3,6 +3,7 @@
                  [org.clojure/clojurescript "1.10.238"]
                  [reagent "0.7.0"]
                  [re-frame "0.10.6"]
+                 [org.clojure/core.async "0.2.395"]
                  [com.degel/re-frame-firebase "0.7.0"]
                  [secretary "1.2.3"]]
 

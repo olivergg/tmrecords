@@ -48,6 +48,25 @@
    (as-> (:players db) x
      (map :name x))))
 
+
+(re-frame/reg-sub
+  ::find-player-by-alias
+  (fn [db [_ alias]]
+    (as-> (:players db) x
+          (filter #(some #{alias} (:aliases %)) x)
+          (first x))))
+
+(re-frame/reg-sub
+  ::find-track
+  (fn [db [_ trackname]]
+    (as-> (:records db) x
+          (filter #(= (-> % :track .toLowerCase) (.toLowerCase trackname)) x)
+          (first x)
+          (:id x))))
+
+
+
+
 (re-frame/reg-sub
  ::get-records
  (fn [db x]
@@ -174,4 +193,11 @@
   :user
   (fn [db _]
     (:user db)))
+
+
+
+(re-frame/reg-sub
+  :db
+  (fn [db _] db))
+
 
