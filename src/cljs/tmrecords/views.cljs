@@ -85,10 +85,15 @@
                                                                :left             (str x "px")}}])
                    leftseries)]]))
 
+(defn make-gbx-link
+  "Make a GBX link from the track name, using default storage location (malchrosoft)"
+  [track]
+  (goog.string/format "http://aymeric.malchrosoft.com/TMNF/tracks/%s.Challenge.Gbx" track))
+
 (defn score-row
   "Render a row in the score table (output a tr element)"
   [{:keys [times ranking track gbx timessorted]}]
-  [:tr [:td [:a {:href (or gbx "#")} track]]
+  [:tr [:td [:a {:href (or gbx (make-gbx-link track))} track]]
    (for [p (<sub [::subs/get-players])
          :let [position (get ranking p -1)
                duration (readable-duration (get times p "-"))]]
