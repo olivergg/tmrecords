@@ -82,21 +82,30 @@
          (assoc r :timessorted timesorted
                   :times (into {} timesorted)
                   :ranking players-ranks
+                  :isvalid (>=  (count timesorted) 3)
                   :best (second (first timesorted))))))
+
+(re-frame/reg-sub
+ ::count-valid-records
+ :<- [::ranked-records]
+ (fn [records]
+   (count (filter :isvalid records))))
 
 (re-frame/reg-sub
   ::deltas-podium
   :<- [::ranked-records]
   :<- [::get-mincount]
-  (fn [[records mincount] _]
-    (as-> (for [r records]
+  :<- [::count-valid-records]
+  (fn [[records mincount countvalidrecords] _]
+    (as-> (for [r records
+                :when (:isvalid r)]
             {:track          (:track r)
              :diff-with-best (into {} (map (fn [[p time]] {p [(- time (:best r))]})
                                            (:timessorted r)))}) x
       (reduce (fn [m1 m2] {:diff-with-best (merge-with into (:diff-with-best m1) (:diff-with-best m2))}) x)
       (:diff-with-best x)
       (map (fn [[p player-times]] (merge {:player p} (mean player-times))) x)
-      (filter (comp #(>= % (* mincount (count records))) :count)  x)
+      (filter (comp #(>= % (* mincount countvalidrecords)) :count)  x)
       (sort-by :avg x)
       (take 3 x))))
 
@@ -129,11 +138,13 @@
   :<- [::ranked-records]
   :<- [::count-records-by-player]
   :<- [::get-mincount]
-  (fn [[players records countbyplayer mincount] _]
-    (def minimalcount-tiebreaker (comp (fn [t] (if (< t (* mincount (count records))) 2 1))
+  :<- [::count-valid-records]
+  (fn [[players records countbyplayer mincount countvalidrecords] _]
+    (def minimalcount-tiebreaker (comp (fn [t] (if (< t (* mincount countvalidrecords)) 2 1))
                                        countbyplayer
                                        :player))
-    (as-> (for [r records]
+    (as-> (for [r records
+                :when (:isvalid r)]
                (for [p players
                       :let [position (get (:ranking r) p -1)]
                       :when (>= position 0)]

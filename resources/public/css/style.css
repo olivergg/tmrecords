@@ -177,6 +177,11 @@ table.scoreTable td.thirdbest a {
     color: #cd7f32;
 }
 
+.notenough {
+    font-style:italic;
+    color:#c8c8c850;
+}
+
 #footnote {
     position: absolute;
     bottom: 40px;

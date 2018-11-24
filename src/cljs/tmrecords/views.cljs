@@ -92,27 +92,27 @@
 
 (defn score-row
   "Render a row in the score table (output a tr element)"
-  [{:keys [times ranking track gbx timessorted]}]
-  [:tr [:td [:a {:href (or gbx (make-gbx-link track))} track]]
+  [{:keys [times ranking track gbx timessorted isvalid]}]
+  [:tr [:td [:a {:href (or gbx (make-gbx-link track)) :title "Click here to download this track"} track]]
    (for [p (<sub [::subs/get-players])
          :let [position (get ranking p -1)
                duration (readable-duration (get times p "-"))]]
      ^{:key p}
-     [:td {:class-name (case position
-                         0 "best"
-                         1 "secondbest"
-                         2 "thirdbest"
-                         "")}
+     [:td {:class-name (if isvalid (case position
+                                    0 "best"
+                                    1 "secondbest"
+                                    2 "thirdbest"
+                                    "") "notenough")}
       duration])
    [:td {:style {:width "100px"}}
-    (visualspread (map second timessorted))]])
+    (when isvalid (visualspread (map second timessorted)))]])
 
 
 (defn score-table
   "A simple table that displays the records stored in the database for each tracks"
   []
   [:section.scoreContainer
-   [:h1 "Track record board"]
+   [:h1 "Track record board " (str "("  (<sub [::subs/count-valid-records])  " / " (count (<sub [::subs/ranked-records])) ")")]
    [:table#scoreTable.scoreTable
     [:tbody
      [:tr [:th "Track"] (for [p (<sub [::subs/get-players])] ^{:key p} [:th p]) [:th "Spread"]]
