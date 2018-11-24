@@ -82,7 +82,7 @@
          (assoc r :timessorted timesorted
                   :times (into {} timesorted)
                   :ranking players-ranks
-                  :isvalid (>=  (count timesorted) 3)
+                  :isvalid (>=  (count timesorted) 2)
                   :best (second (first timesorted))))))
 
 (re-frame/reg-sub
