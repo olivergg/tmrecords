@@ -105,8 +105,7 @@
   (fn [{db :db} [_ trackid player time]]
     ;; TODO : improve by using unionArray of firestore ? (to update a single element in an array instead of the whole array)
     {:firestore/update
-     ;;FIXME : change :mock to :records once everything will be properly tested
-     {:path [:mock trackid]
+     {:path [:records trackid]
       :data {:times (as-> db x
                           (get-in x [:records])
                           (filter #(= trackid (:id %)) x)

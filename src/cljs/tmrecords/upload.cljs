@@ -85,7 +85,7 @@
         {:keys [trackid player time]} @file-data
         hasdata (not (empty? fd))]
     [:section
-     [:h2 "Upload a GBX replay (mock collection for now)"]
+     [:h2 "Upload a GBX replay"]
      [input-component]
      (when hasdata
        [:ul
