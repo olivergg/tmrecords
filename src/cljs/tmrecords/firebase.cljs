@@ -20,8 +20,8 @@
                 :get-user-sub           [:user]
                 :set-user-event         [:set-user]
                 :default-error-handler  [:firebase-error])
- (rf/dispatch-sync [:players-listen])
- (rf/dispatch-sync [:records-listen]))
+ (rf/dispatch [:players-listen])
+ (rf/dispatch [:records-listen]))
 
 
 
