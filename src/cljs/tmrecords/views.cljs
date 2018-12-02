@@ -111,13 +111,28 @@
 (defn score-table
   "A simple table that displays the records stored in the database for each tracks"
   []
-  [:section.scoreContainer
-   [:h1 "Track record board " (str "("  (<sub [::subs/count-valid-records])  " / " (count (<sub [::subs/ranked-records])) ")")]
-   [:table#scoreTable.scoreTable
-    [:tbody
-     [:tr [:th "Track"] (for [p (<sub [::subs/get-players])] ^{:key p} [:th p]) [:th "Spread"]]
-     (for [r (<sub [::subs/ranked-records])]
-       ^{:key (:track r)} [score-row r])]]])
+  (let [filter-value (reagent.core/atom "")]
+   (fn[]
+     (let [records (<sub [::subs/filtered-ranked-records @filter-value])
+           players (<sub [::subs/get-players])
+           countvalidrecords (<sub [::subs/count-valid-records])
+           totalrecords (<sub [::subs/ranked-records])]
+      [:section.scoreContainer
+       [:h1 "Track record board "]
+       [:h4 (goog.string/format "There are a total of %s tracks, %s of which are validated" (count totalrecords) countvalidrecords)]
+       [:table#scoreTable.scoreTable
+        [:tbody
+         [:tr [:th (goog.string/format "Track (%s/%s)" (count records) (count totalrecords))] (for [p players] ^{:key p} [:th p]) [:th "Spread"]]
+         [:tr [:td {:col-span  (+ 2 (count players))}
+               [:input {:style {:width "100%"
+                                :background-color "transparent"
+                                :border "none"
+                                :color "white"}
+                        :type "text" :default-value @filter-value
+                        :placeholder "Filter displayed tracks ..."
+                        :on-change #(reset! filter-value (-> % .-target .-value))}]]]
+         (for [r records]
+            ^{:key (:track r)} [score-row r])]]]))))
 
 
 (defn deltas-podiums

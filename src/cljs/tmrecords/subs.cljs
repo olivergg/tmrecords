@@ -86,6 +86,12 @@
                   :best (second (first timesorted))))))
 
 (re-frame/reg-sub
+ ::filtered-ranked-records
+ :<- [::ranked-records]
+ (fn [records [_ filterstr]]
+  (filter #(clojure.string/includes? (-> % :track .toLowerCase) (-> filterstr .toLowerCase)) records)))
+
+(re-frame/reg-sub
  ::count-valid-records
  :<- [::ranked-records]
  (fn [records]
