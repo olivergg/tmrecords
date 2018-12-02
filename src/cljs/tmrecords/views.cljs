@@ -9,7 +9,7 @@
 
 ;; constants
 ;; some predefined colors
-(defonce colors ["gold", "silver", "#cd7f32","#FF34FF", "#008941", "#006FA6", "#A30059"])
+(def colors ["gold", "silver", "#cd7f32","#FF34FF", "cyan", "#006FA6", "#A30059"])
 
 ;; helper functions
 (defn readable-duration
