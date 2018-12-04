@@ -49,27 +49,27 @@
 
 
 (defn ranking
-  "Render the Olympic Ranking table"
+  "Render the olympic ranking table"
   []
-  (let [isplayerfirstformedal (<sub [::subs/is-player-first-for-medal-fn])
-        getplayertotalmedal (<sub [::subs/get-player-total-medal-fn])
-        getplayerrankfreq (<sub [::subs/get-player-rank-freq-fn])
-        sortedusers (<sub [::subs/sorteduser])]
+  (let [ranking (<sub [::subs/olympic-ranking])]
     [:section
-     [:h1 "Olympic ranking" (footnotelink)]
-     [:table.ranking
-      [:tbody
-       [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"] [:th "Total"]]
-       (doall (map-indexed (fn [idx p]
-                             [:tr {:key (str idx p)} [:td (str (inc idx) "." p)]
-                              [:td {:class-name (if (isplayerfirstformedal p 0) "gold" "")}
-                               (getplayerrankfreq p 0)]
-                              [:td {:class-name (if (isplayerfirstformedal p 1) "silver" "")}
-                               (getplayerrankfreq p 1)]
-                              [:td {:class-name (if (isplayerfirstformedal p 2) "bronze" "")}
-                               (getplayerrankfreq p 2)]
-                              [:td (getplayertotalmedal p)]])
-                           sortedusers))]]]))
+      [:h1 "Olympic ranking" (footnotelink)]
+      [:table.ranking
+       [:tbody
+        [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"] [:th "Total"]]
+        (doall (for [r ranking
+                     :let [p (::subs/player r)
+                           idx (::subs/idx r)]]
+                 [:tr {:key (str idx p)} [:td (str (inc idx) "." p)]
+                  [:td {:class-name (if (::subs/isfirstforgold r) "gold" "")}
+                   (::subs/numberofgold r)]
+                  [:td {:class-name (if (::subs/isfirstforsilver r) "silver" "")}
+                   (::subs/numberofsilver r)]
+                  [:td {:class-name (if (::subs/isfirstforbronze r) "bronze" "")}
+                   (::subs/numberofbronze r)]
+                  [:td (::subs/totalnumber r)]]))]]]))
+
+        
 
 
 (defn visualspread
