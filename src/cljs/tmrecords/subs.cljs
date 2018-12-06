@@ -73,10 +73,18 @@
    (:records db)))
 
 (re-frame/reg-sub
+  ::get-track-filter-value
+  (fn [db _]
+    (:track-filter-value db)))
+
+
+(re-frame/reg-sub
   ::ranked-records
   :<- [::get-records]
-  (fn [records]
+  :<- [::get-track-filter-value]
+  (fn [[records filterstr] _]
     (for [r records
+          :when (clojure.string/includes? (-> r :track .toLowerCase) (-> filterstr .toLowerCase))
           :let [timesorted (times-sorter (:times r))
                 players-ranks (into {} (map-indexed (fn [idx v] {(first v) idx}) timesorted))]]
          (assoc r :timessorted timesorted
@@ -85,11 +93,6 @@
                   :isvalid (>=  (count timesorted) 3)
                   :best (second (first timesorted))))))
 
-(re-frame/reg-sub
- ::filtered-ranked-records
- :<- [::ranked-records]
- (fn [records [_ filterstr]]
-  (filter #(clojure.string/includes? (-> % :track .toLowerCase) (-> filterstr .toLowerCase)) records)))
 
 (re-frame/reg-sub
  ::count-valid-records
