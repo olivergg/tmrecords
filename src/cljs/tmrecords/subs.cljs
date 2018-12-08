@@ -73,10 +73,18 @@
    (:records db)))
 
 (re-frame/reg-sub
+  ::get-track-filter-value
+  (fn [db _]
+    (:track-filter-value db)))
+
+
+(re-frame/reg-sub
   ::ranked-records
   :<- [::get-records]
-  (fn [records]
+  :<- [::get-track-filter-value]
+  (fn [[records filterstr] _]
     (for [r records
+          :when (clojure.string/includes? (-> r :track .toLowerCase) (-> filterstr .toLowerCase))
           :let [timesorted (times-sorter (:times r))
                 players-ranks (into {} (map-indexed (fn [idx v] {(first v) idx}) timesorted))]]
          (assoc r :timessorted timesorted
@@ -84,6 +92,7 @@
                   :ranking players-ranks
                   :isvalid (>=  (count timesorted) 3)
                   :best (second (first timesorted))))))
+
 
 (re-frame/reg-sub
  ::count-valid-records
@@ -161,42 +170,46 @@
   (fn [ranking]
     (distinct (map :player ranking))))
 
-(re-frame/reg-sub
-  ::get-player-rank-freq-fn
-  :<- [::ranking]
-  (fn [ranking]
-    (fn [player rank]
-      (as-> ranking x
-        (filter #(and (= (:player %) player) (= (:position %) rank)) x)
-        (first x)
-        (get x :freq 0)))))
-
 
 (re-frame/reg-sub
-  ::get-player-total-medal-fn
+  ::olympic-ranking
   :<- [::ranking]
-  (fn [ranking]
-    (fn [player]
-      (as-> ranking x
-            ;; medal are position 0 (gold) 1 (silver) and 2 (bronze)
-            (filter #(and (= (:player %)  player) (<= (:position %) 2)) x)
-            (map :freq x)
-            (reduce + x)))))
+  :<- [::sorteduser]
+  (fn [[ranking sortedusers] _]
+    (letfn [(get-player-rank-freq [player rank]
+              (as-> ranking x
+                    (filter #(and (= (:player %) player) (= (:position %) rank)) x)
+                    (first x)
+                    (get x :freq 0)))
+            (get-player-total-medal [player]
+              (as-> ranking x
+                    ;; medal are position 0 (gold) 1 (silver) and 2 (bronze)
+                    (filter #(and (= (:player %)  player) (<= (:position %) 2)) x)
+                    (map :freq x)
+                    (reduce + x)))
+            (is-player-first-for-medal [player rank]
+              (as-> ranking x
+                    (group-by :position x)
+                    (map (fn [t] (-> t val first)) x)
+                    (into [] x)
+                    (get x rank)
+                    (:player x)
+                    (= x player)))]
+      (as-> sortedusers x
+            (map-indexed (fn [idx p]
+                           {::idx idx
+                            ::player p
+                            ::isfirstforgold (is-player-first-for-medal p 0)
+                            ::numberofgold (get-player-rank-freq p 0)
+                            ::isfirstforsilver (is-player-first-for-medal p 0)
+                            ::numberofsilver (get-player-rank-freq p 1)
+                            ::isfirstforbronze (is-player-first-for-medal p 2)
+                            ::numberofbronze (get-player-rank-freq p 2)
+                            ::totalnumber (get-player-total-medal p)}) x)
+            (into [] x)))))
 
 
 
-(re-frame/reg-sub
-  ::is-player-first-for-medal-fn
-  :<- [::ranking]
-  (fn [ranking]
-    (fn [player rank]
-      (as-> ranking x
-          (group-by :position x)
-          (map (fn [t] (-> t val first)) x)
-          (into [] x)
-          (get x rank)
-          (:player x)
-          (= x player)))))
 
 
 
@@ -210,5 +223,7 @@
 (re-frame/reg-sub
   :db
   (fn [db _] db))
+
+
 
 

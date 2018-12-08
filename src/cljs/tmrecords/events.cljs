@@ -20,6 +20,12 @@
  (fn [db [_ active-panel]]
    (assoc db :active-panel active-panel)))
 
+(re-frame/reg-event-db
+  :set-track-filter-value
+  (fn [db [_ filterstr]]
+   (assoc db :track-filter-value filterstr)))
+
+
 
 
 ;;;;;;;;;;; FIREBASE STUFF ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

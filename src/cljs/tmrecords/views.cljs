@@ -9,7 +9,7 @@
 
 ;; constants
 ;; some predefined colors
-(defonce colors ["gold", "silver", "#cd7f32","#FF34FF", "#008941", "#006FA6", "#A30059"])
+(def colors ["gold", "silver", "#cd7f32","#FF34FF", "cyan", "#006FA6", "#A30059"])
 
 ;; helper functions
 (defn readable-duration
@@ -49,27 +49,27 @@
 
 
 (defn ranking
-  "Render the Olympic Ranking table"
+  "Render the olympic ranking table"
   []
-  (let [isplayerfirstformedal (<sub [::subs/is-player-first-for-medal-fn])
-        getplayertotalmedal (<sub [::subs/get-player-total-medal-fn])
-        getplayerrankfreq (<sub [::subs/get-player-rank-freq-fn])
-        sortedusers (<sub [::subs/sorteduser])]
+  (let [ranking (<sub [::subs/olympic-ranking])]
     [:section
-     [:h1 "Olympic ranking" (footnotelink)]
-     [:table.ranking
-      [:tbody
-       [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"] [:th "Total"]]
-       (doall (map-indexed (fn [idx p]
-                             [:tr {:key (str idx p)} [:td (str (inc idx) "." p)]
-                              [:td {:class-name (if (isplayerfirstformedal p 0) "gold" "")}
-                               (getplayerrankfreq p 0)]
-                              [:td {:class-name (if (isplayerfirstformedal p 1) "silver" "")}
-                               (getplayerrankfreq p 1)]
-                              [:td {:class-name (if (isplayerfirstformedal p 2) "bronze" "")}
-                               (getplayerrankfreq p 2)]
-                              [:td (getplayertotalmedal p)]])
-                           sortedusers))]]]))
+      [:h1 "Olympic ranking" (footnotelink)]
+      [:table.ranking
+       [:tbody
+        [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"] [:th "Total"]]
+        (doall (for [r ranking
+                     :let [p (::subs/player r)
+                           idx (::subs/idx r)]]
+                 [:tr {:key (str idx p)} [:td (str (inc idx) "." p)]
+                  [:td {:class-name (if (::subs/isfirstforgold r) "gold" "")}
+                   (::subs/numberofgold r)]
+                  [:td {:class-name (if (::subs/isfirstforsilver r) "silver" "")}
+                   (::subs/numberofsilver r)]
+                  [:td {:class-name (if (::subs/isfirstforbronze r) "bronze" "")}
+                   (::subs/numberofbronze r)]
+                  [:td (::subs/totalnumber r)]]))]]]))
+
+        
 
 
 (defn visualspread
@@ -108,16 +108,32 @@
     (when isvalid (visualspread (map second timessorted)))]])
 
 
+
 (defn score-table
   "A simple table that displays the records stored in the database for each tracks"
   []
-  [:section.scoreContainer
-   [:h1 "Track record board " (str "("  (<sub [::subs/count-valid-records])  " / " (count (<sub [::subs/ranked-records])) ")")]
-   [:table#scoreTable.scoreTable
-    [:tbody
-     [:tr [:th "Track"] (for [p (<sub [::subs/get-players])] ^{:key p} [:th p]) [:th "Spread"]]
-     (for [r (<sub [::subs/ranked-records])]
-       ^{:key (:track r)} [score-row r])]]])
+  (let [records (<sub [::subs/ranked-records])
+        players (<sub [::subs/get-players])
+        filtervalue (<sub [::subs/get-track-filter-value])
+        countvalidrecords (<sub [::subs/count-valid-records])
+        totalrecords (<sub [::subs/ranked-records])]
+   [:section.scoreContainer
+    [:h1 "Track record board "]
+    [:h4 (goog.string/format "There are a total of %s tracks, %s of which are validated" (count totalrecords) countvalidrecords)]
+    [:table#scoreTable.scoreTable
+     [:tbody
+      [:tr [:th (goog.string/format "Track (%s/%s)" (count records) (count totalrecords))] (for [p players] ^{:key p} [:th p]) [:th "Spread"]]
+      [:tr [:td {:col-span  (+ 2 (count players))}
+            [:input {:style       {:width            "100%"
+                                   :background-color "transparent"
+                                   :border           "none"
+                                   :color            "white"}
+                     :type        "text"
+                     :default-value filtervalue
+                     :placeholder "Filter displayed tracks ..."
+                     :on-change   #(>evt [:set-track-filter-value (-> % .-target .-value)])}]]]
+      (for [r records]
+         ^{:key (:track r)} [score-row r])]]]))
 
 
 (defn deltas-podiums

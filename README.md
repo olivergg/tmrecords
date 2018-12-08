@@ -22,6 +22,8 @@ Alpha preview is available here : https://tmrecords-fa4b2.firebaseapp.com/
 
 - allow the players to vote for their favorite tracks
 
+- improve olympic ranking subscriptions. Do not return functions as subscriptions output. do the heavy computation in the subscription, not in the view.
+
 ## Development Mode
 
 ### Start Cider from Emacs:
