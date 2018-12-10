@@ -62,6 +62,8 @@ table.ranking {
 .scoreContainer {
     margin-right: 40px;
     margin-bottom: 50px;
+    position: relative;
+	float: left;
 }
 
 table.scoreTable {
@@ -77,7 +79,6 @@ table.scoreTable>tbody>tr>td {
     padding: 3px;
     min-width: 100px;
     text-align: right;
-   
 }
 
 table>tbody>tr:NTH-CHILD(2)>td {
@@ -137,9 +138,6 @@ table.scoreTable td.thirdbest a {
   background-color: green;
   overflow: hidden;
   width: 100px;
-    
-  
-
 }
 
 #visualdiff-inner {
