@@ -48,27 +48,33 @@
   [:span [:a {:href "#footnote"} " *"]])
 
 
+(defn nodata-div
+  "No data div"
+  []
+  [:div.nodata "No data \uD83D\uDE1F"])
+
 (defn ranking
   "Render the olympic ranking table"
   []
   (let [ranking (<sub [::subs/olympic-ranking])]
     [:section
       [:h1 "Olympic ranking" (footnotelink)]
-      [:table.ranking
-       [:tbody
-        [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"] [:th "Total"]]
-        (doall (for [r ranking
-                     :let [p (::subs/player r)
-                           idx (::subs/idx r)]]
-                 [:tr {:key (str idx p)} [:td (str (inc idx) "." p)]
-                  [:td {:class-name (if (::subs/isfirstforgold r) "gold" "")}
-                   (::subs/numberofgold r)]
-                  [:td {:class-name (if (::subs/isfirstforsilver r) "silver" "")}
-                   (::subs/numberofsilver r)]
-                  [:td {:class-name (if (::subs/isfirstforbronze r) "bronze" "")}
-                   (::subs/numberofbronze r)]
-                  [:td (::subs/totalnumber r)]]))]]]))
-
+      (if (not-empty ranking)
+        [:table.ranking
+         [:tbody
+          [:tr [:th "Player"] [:th.gold "Gold"] [:th.silver "Silver"] [:th.bronze "Bronze"] [:th "Total"]]
+          (doall (for [r ranking
+                       :let [p (::subs/player r)
+                             idx (::subs/idx r)]]
+                   [:tr {:key (str idx p)} [:td (str (inc idx) "." p)]
+                    [:td {:class-name (if (::subs/isfirstforgold r) "gold" "")}
+                     (::subs/numberofgold r)]
+                    [:td {:class-name (if (::subs/isfirstforsilver r) "silver" "")}
+                     (::subs/numberofsilver r)]
+                    [:td {:class-name (if (::subs/isfirstforbronze r) "bronze" "")}
+                     (::subs/numberofbronze r)]
+                    [:td (::subs/totalnumber r)]]))]]
+        (nodata-div))]))
         
 
 
@@ -124,16 +130,13 @@
      [:tbody
       [:tr [:th (goog.string/format "Track (%s/%s)" (count records) (count totalrecords))] (for [p players] ^{:key p} [:th p]) [:th "Spread"]]
       [:tr [:td {:col-span  (+ 2 (count players))}
-            [:input {:style       {:width            "100%"
-                                   :background-color "transparent"
-                                   :border           "none"
-                                   :color            "white"}
-                     :type        "text"
-                     :default-value filtervalue
-                     :placeholder "Filter displayed tracks ..."
-                     :on-change   #(>evt [:set-track-filter-value (-> % .-target .-value)])}]]]
+            [:input.filterInput {:type        "text"
+                                 :default-value filtervalue
+                                 :placeholder "Filter displayed tracks ..."
+                                 :on-change   #(>evt [:set-track-filter-value (-> % .-target .-value)])}]]]
       (for [r records]
          ^{:key (:track r)} [score-row r])]]]))
+
 
 
 (defn deltas-podiums
@@ -144,21 +147,25 @@
         {secondplayer :player} secondp
         {firstplayer :player} firstp
         {thirdplayer :player} thirdp]
-    [:section#podium.podium
-     [:h1 "Deltas podium" (footnotelink)]
-     [:div.rank
-      [:div.second.bloc
-       [:div#tc2.name secondplayer [:br] (render-podium-label secondp)]
-       [:div.step " "]
-       " "]
-      [:div.first.bloc
-       [:div#tc1.name firstplayer [:br] (render-podium-label firstp)]
-       [:div.step " "]
-       " "]
-      [:div.third.bloc
-       [:div#tc3.name thirdplayer [:br] (render-podium-label thirdp)]
-       [:div.step " "]
-       " "]]]))
+
+      [:section#podium.podium
+       [:h1 "Deltas podium" (footnotelink)]
+       (if (and firstp secondp thirdp)
+         [:div.rank
+          [:div.second.bloc
+           [:div#tc2.name secondplayer [:br] (render-podium-label secondp)]
+           [:div.step " "]
+           " "]
+          [:div.first.bloc
+           [:div#tc1.name firstplayer [:br] (render-podium-label firstp)]
+           [:div.step " "]
+           " "]
+          [:div.third.bloc
+           [:div#tc3.name thirdplayer [:br] (render-podium-label thirdp)]
+           [:div.step " "]
+           " "]]
+         (nodata-div))]))
+
 
 (defn footer
   "The footer"

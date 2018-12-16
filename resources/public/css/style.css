@@ -326,4 +326,20 @@ a#lastupdatedlnk {
     line-height: 22px;
     font-size: 12px;
     color:white;
+}
+
+.nodata {
+    font-size: 2em;
+    color: grey;
+}
+
+.filterInput {
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    color: white;
+}
+
+
+
     
