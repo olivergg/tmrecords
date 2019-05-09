@@ -201,7 +201,7 @@
                             ::player p
                             ::isfirstforgold (is-player-first-for-medal p 0)
                             ::numberofgold (get-player-rank-freq p 0)
-                            ::isfirstforsilver (is-player-first-for-medal p 0)
+                            ::isfirstforsilver (is-player-first-for-medal p 1)
                             ::numberofsilver (get-player-rank-freq p 1)
                             ::isfirstforbronze (is-player-first-for-medal p 2)
                             ::numberofbronze (get-player-rank-freq p 2)
