@@ -29,6 +29,9 @@
           (/ x 1000))))
 
 
+
+(def formatting-tags-regexp #"\$[a-fA-F0-9]{3}|\$[iswnmgozt\$]")
+
 ;; transducer to stick on a core-async channel to manipulate all the weird javascript
 ;; event objects --- basically just takes the array of file objects or something
 ;; that the incomprehensible browser API creates and grabs the first one, then resets things.
@@ -37,11 +40,11 @@
          (let [target (.-currentTarget e)
                file (-> target .-files (aget 0))]
            ;;TODO FIXME : find a way to do this outside the transducer
-           (let [[_ playeralias trackfilename] (re-matches #"(.*?)_(.*).Replay.gbx" (.-name file))
+           (let [[_ playeralias trackfilename] (re-matches #"(.*?)_(.*).[Rr]eplay.[gG]bx" (clojure.string/replace (.-name file) formatting-tags-regexp ""))
                  {player :name} (<sub [::subs/find-player-by-alias playeralias])
                  trackid (<sub [::subs/find-track trackfilename])]
              (if (and playeralias player trackid) ;; if match is successfull
-               (swap! file-data assoc :player player :trackid trackid)
+               (swap! file-data assoc :player player :trackid trackid :error nil) ;; put nil to remove previous invalid upload
                (swap! file-data assoc :error "Invalid upload")))
            (set! (.-value target) "")
            file))))
