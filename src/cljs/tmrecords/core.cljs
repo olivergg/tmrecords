@@ -10,12 +10,12 @@
 
 
 
-(defn dev-setup []
+#_(defn dev-setup []
   (when config/debug?
     (enable-console-print!)
     (println "dev mode")))
 
-(defn mount-root []
+(defn ^:dev/after-load mount-root []
   (re-frame/clear-subscription-cache!)
   (reagent/render [views/main-panel]
                   (.getElementById js/document "app")))
@@ -24,6 +24,6 @@
 (defn ^:export init []
   (routes/app-routes)
   (re-frame/dispatch-sync [::events/initialize-db])
-  (dev-setup)
+  ;;(dev-setup)
   (firebase/init)
   (mount-root))

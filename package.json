@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@firebase/app": "^0.5.0",
+    "@firebase/auth": "^0.13.3",
+    "@firebase/database": "^0.5.17",
+    "@firebase/firestore": "^1.9.1",
+    "react": "16.9.0",
+    "react-dom": "16.9.0"
+  },
+  "devDependencies": {
+    "shadow-cljs": "2.8.83"
+  }
+}
