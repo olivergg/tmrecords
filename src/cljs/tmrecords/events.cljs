@@ -2,10 +2,6 @@
   (:require
    [re-frame.core :as re-frame]
    [tmrecords.db :as db]
-   [com.degel.re-frame-firebase :as firebase]
-   ;;[com.rpl.specter :as s]
-   ;;[com.rpl.specter :as s :refer-macros [select transform]] ;; add in the Specter macros that you need
-  ;; [clojure.data.json :as json]
    [clojure.pprint :refer [pprint]]))
 
    

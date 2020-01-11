@@ -20,8 +20,8 @@
   :shadow-cljs {:nrepl {:port 8777}
                 
                 :builds {:app {:target :browser
-                                  :output-dir "resources/public/js/compiled"
-                                  :modules {:app {:init-fn tmrecords.core/init}}
+                               :output-dir "resources/public/js/compiled"
+                               :modules {:app {:init-fn tmrecords.core/init}}
                                :devtools {:http-root "resources/public"
                                           :http-port 8280}}}}
 

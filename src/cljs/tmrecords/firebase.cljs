@@ -1,7 +1,5 @@
 (ns tmrecords.firebase
  (:require [re-frame.core :as rf]
-           [clojure.string :as string]
-           [cljs.reader :as reader]
            [com.degel.re-frame-firebase :as firebase]))
 
 
@@ -16,7 +14,6 @@
 
 (defn ^:export init[]
  (firebase/init :firebase-app-info      firebase-app-info
-                ;;:firestore-settings     {:timestampsInSnapshots true}
                 :get-user-sub           [:user]
                 :set-user-event         [:set-user]
                 :default-error-handler  [:firebase-error])

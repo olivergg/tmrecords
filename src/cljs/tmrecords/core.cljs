@@ -5,25 +5,15 @@
    [tmrecords.events :as events]
    [tmrecords.routes :as routes]
    [tmrecords.views :as views]
-   [tmrecords.config :as config]
    [tmrecords.firebase :as firebase]))
-
-
-
-#_(defn dev-setup []
-  (when config/debug?
-    (enable-console-print!)
-    (println "dev mode")))
 
 (defn ^:dev/after-load mount-root []
   (re-frame/clear-subscription-cache!)
   (reagent/render [views/main-panel]
                   (.getElementById js/document "app")))
 
-
-(defn ^:export init []
+(defn ^:export init "Entry point called from index.html" []
   (routes/app-routes)
   (re-frame/dispatch-sync [::events/initialize-db])
-  ;;(dev-setup)
   (firebase/init)
   (mount-root))
