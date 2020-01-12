@@ -115,6 +115,20 @@
 
 
 
+
+(defn trackadder []
+  (let [localstate (reagent.core/atom "")]
+    (fn []
+      (when (<sub [:user])
+        [:tr
+         [:td {:col-span  (+ 2 (count (<sub [::subs/get-players])))}
+          [:input.filterInput {:value @localstate
+                               :on-change (fn [evt] (reset! localstate (-> evt .-target .-value)))
+                               :placeholder "To add a track, copy paste it's gbx url here..."}]
+          (when (not (empty? @localstate)) [:button {:on-click #(js/alert "NOT YET IMPLEMENTED BRO !")} "Add"])]]))))
+
+
+
 (defn score-table
   "A simple table that displays the records stored in the database for each tracks"
   []
@@ -126,6 +140,7 @@
    [:section.scoreContainer
     [:h1 "Track record board "]
     [:h4 (goog.string/format "There are a total of %s tracks, %s of which are validated" (count totalrecords) countvalidrecords)]
+    ;;[trackadder]
     [:table#scoreTable.scoreTable
      [:tbody
       [:tr [:th (goog.string/format "Track (%s/%s)" (count records) (count totalrecords))] (for [p players] ^{:key p} [:th p]) [:th "Spread"]]
@@ -135,7 +150,8 @@
                                  :placeholder "Filter displayed tracks ..."
                                  :on-change   #(>evt [:set-track-filter-value (-> % .-target .-value)])}]]]
       (for [r records]
-         ^{:key (:track r)} [score-row r])]]]))
+         ^{:key (:track r)} [score-row r])
+      [trackadder]]]]))
 
 
 
