@@ -3,7 +3,7 @@
    [re-frame.core :as rf]
    [tmrecords.upload]
    [tmrecords.subs :as subs]
-   [iron.re-utils :refer [<sub >evt]]
+   [tmrecords.utils :refer [<sub >evt]]
    [goog.string :as gstring]
    goog.string.format))
 

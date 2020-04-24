@@ -3,8 +3,11 @@
    [re-frame.core :as re-frame]))
 
 
-;; helper function
-(defn mean [coll]
+;; helper functions
+(defn mean
+  "Compute the average and count value of a collection of number.
+  Returns a map {:avg XXXX :count NN }"
+  [coll]
   (let [sum (apply + coll)
         count (count coll)]
     (if (pos? count)
@@ -209,21 +212,8 @@
             (into [] x)))))
 
 
-
-
-
-
 (re-frame/reg-sub
   :user
   (fn [db _]
     (:user db)))
-
-
-
-(re-frame/reg-sub
-  :db
-  (fn [db _] db))
-
-
-
 

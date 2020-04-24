@@ -26,28 +26,12 @@ Alpha preview is available here : https://tmrecords-fa4b2.firebaseapp.com/
 
 ## Development Mode
 
-### Start Cider from Emacs:
-
-Put this in your Emacs config file:
-
-```
-(setq cider-cljs-lein-repl
-	"(do (require 'figwheel-sidecar.repl-api)
-         (figwheel-sidecar.repl-api/start-figwheel!)
-         (figwheel-sidecar.repl-api/cljs-repl))")
-```
-
-Navigate to a clojurescript file and start a figwheel REPL with `cider-jack-in-clojurescript` or (`C-c M-J`)
 
 ### Run application:
 
 ```
-lein do clean, figwheel
+shadow-cljs watch app
 ```
-
-Figwheel will automatically push cljs changes to the browser.
-
-Wait a bit, then browse to [http://localhost:3449](http://localhost:3449).
 
 ## Production Build
 
@@ -55,12 +39,12 @@ Wait a bit, then browse to [http://localhost:3449](http://localhost:3449).
 To compile Clojurescript to Javascript:
 
 ```
-lein do clean, cljsbuild once min
+shadow-cljs release app
 ```
 
 To deploy to firebase (remember to change the API credentials to use your own):
 
-```reStructuredText
+```
 firebase deploy
 ```
 
