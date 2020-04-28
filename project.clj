@@ -1,12 +1,12 @@
 (defproject tmrecords "0.1.1-SNAPSHOT"
 
   :dependencies [[org.clojure/clojure        "1.10.1"]
-                 [org.clojure/clojurescript  "1.10.597"
+                 [org.clojure/clojurescript  "1.10.741"
                   :exclusions [com.google.javascript/closure-compiler-unshaded
                                org.clojure/google-closure-library
                                org.clojure/google-closure-library-third-party]]
                  [binaryage/devtools         "1.0.0"]
-                 [thheller/shadow-cljs       "2.8.99"]
+                 [thheller/shadow-cljs       "2.8.107"]
                  [thheller/shadow-cljsjs     "0.0.21"]
                  [reagent                    "0.10.0"]
                  [re-frame                   "0.12.0"]
