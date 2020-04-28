@@ -2,9 +2,7 @@
   (:require [reagent.core :refer [render atom]]
             [cljs.core.async :refer [put! chan <! >!]]
             [tmrecords.subs :as subs]
-            [re-frame.core :as r
-             :refer [subscribe dispatch]
-             :rename {subscribe <sub dispatch >evt}])
+            [tmrecords.utils :refer [<sub >evt]])
 
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
