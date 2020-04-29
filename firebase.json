@@ -6,6 +6,7 @@
     "public": "resources/public",
     "ignore": [
       "firebase.json",
+      "**/cljs-runtime/**",
       "**/.*",
       "**/node_modules/**"
     ],
