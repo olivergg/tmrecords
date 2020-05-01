@@ -18,7 +18,7 @@
    (assoc db :active-panel active-panel)))
 
 (re-frame/reg-event-db
-  :set-track-filter-value
+  ::set-track-filter-value
   (fn [db [_ filterstr]]
    (assoc db :track-filter-value filterstr)))
 
@@ -123,9 +123,13 @@
       :on-failure #(js/alert (str "Error:" %))}}))
 
 (re-frame/reg-event-fx
-  ;; TODO : add a button to add a track ?
-  :add-track
-  (fn [_ [_ trackid trackname]] {:firestore/set {:path [:records (keyword trackid)]
-                                                 :data {:track trackname}}}))
+  ::add-track
+  (fn [_ [_ gbxurl]]
+    (let [[fullurl trackname] (re-matches #"http[s]?://.*/([^/]+).Challenge.[gG]bx" gbxurl)]
+      ;; (prn fullurl trackname) ;; uncomment to debug
+      {:firestore/set {:path [:records (keyword trackname)]
+                       :data {:track trackname :gbx fullurl :times []}
+                       :on-failure #(js/alert (str "Error:" %))
+                       :on-success #(js/alert "Track successfully added")}})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -114,6 +114,20 @@
     (when isvalid (visualspread (map second timessorted)))]])
 
 
+(defn trackadder
+  "Simple input (when the user is connected) to add a new track to firestore"
+  []
+  (let [localstate (reagent.core/atom "")]
+    (fn []
+      (when (<sub [:user])
+        [:tr
+         [:td {:col-span (+ 2 (count (<sub [::subs/get-players])))}
+          [:input.filterInput {:value @localstate
+                               :on-change (fn [evt] (reset! localstate (-> evt .-target .-value)))
+                               :placeholder "To add a track, copy paste it's gbx url here..."}]
+          (when (not (empty? @localstate))
+            [:button {:on-click #(>evt [:tmrecords.events/add-track @localstate])}
+             "Add"])]]))))
 
 (defn score-table
   "A simple table that displays the records stored in the database for each tracks"
@@ -133,9 +147,10 @@
             [:input.filterInput {:type        "text"
                                  :default-value filtervalue
                                  :placeholder "Filter displayed tracks ..."
-                                 :on-change   #(>evt [:set-track-filter-value (-> % .-target .-value)])}]]]
+                                 :on-change   #(>evt [:tmrecords.events/set-track-filter-value (-> % .-target .-value)])}]]]
       (for [r records]
-         ^{:key (:track r)} [score-row r])]]]))
+         ^{:key (:track r)} [score-row r])
+      [trackadder]]]]))
 
 
 
